@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Asistencia Institucional</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        h2 { color: #1e293b; margin-bottom: 5px; }
+        p.subtitle { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+        .camera-box {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        canvas { display: none; }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #1d4ed8; }
+        button:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+        .status {
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        .error { background: #fee2e2; color: #991b1b; display: block; }
+        .success { background: #dcfce7; color: #166534; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Control de Asistencia</h2>
+    <p class="subtitle">Por favor, enfoque su rostro y marque su registro</p>
+    
+    <div class="camera-box">
+        <video id="video" autoplay playsinline></video>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <button id="btnRegistrar" disabled>Validando Identificación y GPS...</button>
+    <div id="statusBox" class="status"></div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const empleadoId = urlParams.get('id'); // Captura el ?id=PAD_001 seguro
+    
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const btnRegistrar = document.getElementById('btnRegistrar');
+    const statusBox = document.getElementById('statusBox');
+    
+    let userCoords = null;
+
+    // Validación estricta: Si no viene ID en el QR, bloquea el sistema
+    if (!empleadoId) {
+        mostrarEstado("Error: Código de acceso no válido o ausente.", true);
+    } else {
+        inicializarSistema();
+    }
+
+    function mostrarEstado(msg, isError) {
+        statusBox.innerText = msg;
+        statusBox.className = "status " + (isError ? "error" : "success");
+    }
+
+    async function inicializarSistema() {
+        try {
+            // 1. Forzar encendido de cámara frontal en vivo (Evita subir fotos de galería)
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "user" }, 
+                audio: false 
+            });
+            video.srcObject = stream;
+
+            // 2. Solicitar Geolocalización con alta precisión de hardware
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        // Validación anti-Fake GPS inicial: Validamos la precisión reportada por el sensor
+                        if(position.coords.accuracy > 150) { // Si la precisión es muy mala, puede ser un emulador
+                            mostrarEstado("Error: Señal de GPS inestable o simulada detectada.", true);
+                            return;
+                        }
+                        userCoords = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        btnRegistrar.disabled = false;
+                        btnRegistrar.innerText = "Marcar Asistencia Activa";
+                    },
+                    (err) => {
+                        mostrarEstado("Error: Es obligatorio permitir el acceso al GPS para marcar.", true);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                mostrarEstado("Error: Su navegador no es compatible con geolocalización.", true);
+            }
+        } catch (e) {
+            mostrarEstado("Error: Es obligatorio permitir el acceso a la cámara.", true);
+        }
+    }
+
+    btnRegistrar.addEventListener('click', async () => {
+        btnRegistrar.disabled = true;
+        btnRegistrar.innerText = "Procesando Registro...";
+        
+        // Capturar el fotograma exacto del stream de video en vivo
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7); // Comprime al 70% para ahorrar ancho de banda de red
+
+        // URL provisional de tu Apps Script actual para procesar los datos (Luego la migraremos de forma segura a Vercel)
+        const appsScriptUrl = "https://script.google.com/macros/s/AKfycbxUBvr8sDIk29pplE65-mpdlas3Xfvb09iYFrRLgviOMNph5JI3yfIs1JHjXqn8h7iNcA/exec";
+
+        // Estructura de envío segura
+        const payload = {
+            id: empleadoId,
+            latitud: userCoords.lat,
+            longitud: userCoords.lng,
+            foto: fotoBase64
+        };
+
+        try {
+            // Envío asíncronizado nativo en segundo plano
+            const response = await fetch(appsScriptUrl, {
+                method: "POST",
+                mode: "no-cors", // Evita bloqueos de políticas CORS en el navegador del móvil
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            
+            mostrarEstado("¡Asistencia registrada correctamente! Puede cerrar esta ventana.", false);
+            btnRegistrar.innerText = "Registro Completado";
+        } catch (error) {
+            mostrarEstado("Error al conectar con el servidor de asistencia. Reintente.", true);
+            btnRegistrar.disabled = false;
+            btnRegistrar.innerText = "Marcar Asistencia Activa";
+        }
+    });
+</script>
+
+</body>
+</html>
