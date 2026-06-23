@@ -125,7 +125,7 @@
                             lng: position.coords.longitude
                         };
                         btnRegistrar.disabled = false;
-                        btnRegistrar.innerText = "Marcar Asistencia Activa";
+                        btnRegistrar.innerText = "Marcar Asistencia";
                     },
                     (err) => {
                         mostrarEstado("Error: Es obligatorio permitir el acceso al GPS para marcar.", true);
@@ -175,7 +175,7 @@
         } catch (error) {
             mostrarEstado("Error al conectar con el servidor de asistencia. Reintente.", true);
             btnRegistrar.disabled = false;
-            btnRegistrar.innerText = "Marcar Asistencia Activa";
+            btnRegistrar.innerText = "Marcar Asistencia";
         }
     });
 </script>
