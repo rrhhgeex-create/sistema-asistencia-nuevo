@@ -79,9 +79,9 @@
 </div>
 
 <script>
-    // Código NUEVO
+    // 1. Cambiamos la extracción para usar 'token'
     const urlParams = new URLSearchParams(window.location.search);
-    const tokenEmpleado = urlParams.get('token') || "";
+    const tokenEmpleado = urlParams.get('token') || ""; // <-- Cambiado de id a token
     
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
@@ -89,12 +89,12 @@
     const statusBox = document.getElementById('statusBox');
     
     let userCoords = null;
-
-    // Validación estricta: Si no viene ID en el QR, bloquea el sistema
-    if (!empleadoId) {
+    
+    // 2. Validación adaptada al Token Seguro (Reemplazo de las líneas 93 a 98 de tu captura)
+    if (!tokenEmpleado) {
         mostrarEstado("Error: Código de acceso no válido o ausente.", true);
     } else {
-        inicializarSistema();
+        inicializarSistema(); // Arraque normal si existe el token seguro
     }
 
     function mostrarEstado(msg, isError) {
@@ -148,7 +148,7 @@
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
-        const fotoBase64 = canvas.toDataURL('image/jpeg', 0.7); // Comprime al 70% para ahorrar ancho de banda de red
+        const fotoBase64 = canvas.toDataURL('image/jpeg', 0.6); // Comprime al 60% para ahorrar ancho de banda de red
 
         // URL provisional de tu Apps Script actual para procesar los datos (Luego la migraremos de forma segura a Vercel)
         const appsScriptUrl = "https://script.google.com/macros/s/AKfycbzlxNGfCFnx6Eb7MuRJi4VhwLZVzIrcw_iDQv7zUWeW1f5SBrq20kirRqnmxRwHZKU9Vw/exec";
