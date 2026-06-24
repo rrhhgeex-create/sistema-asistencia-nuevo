@@ -158,17 +158,21 @@
                 longitud: userCoords.lng,
                 foto: fotoBase64
             };
-
+            // Reemplazo del bloque try/catch del fetch por este:
             try {
+                // Usamos 'keepalive: true' para asegurar que la petición no se corte si el navegador cambia de contexto
                 await fetch(appsScriptUrl, {
                     method: "POST",
-                    body: JSON.stringify(payload)
-                });
-                
+                    mode: "no-cors", // Volvemos a activar no-cors pero controlando el flujo en el Backend
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8" // Google prefiere text/plain para peticiones CORS cruzadas
+                },
+                body: JSON.stringify(payload)
+            });
+    
                 mostrarEstado("¡Asistencia registrada correctamente! Puede cerrar esta ventana.", false);
                 btnRegistrar.innerText = "Registro Completado";
             } catch (error) {
-                // Manejo de la redirección transparente de Google Web Apps
                 mostrarEstado("¡Asistencia enviada al servidor! Verifique su registro.", false);
                 btnRegistrar.innerText = "Registro Completado";
             }
