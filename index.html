@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Control de Despachos</title>
+    <title>REGISTRO DE ASISTENCIA</title>
     <style>
         :root {
             --primary: #0f172a;
@@ -65,7 +65,6 @@
             letter-spacing: 1px;
         }
 
-        /* DISEÑO DE BANNERS ESTADO PROGRESIVO DE GPS */
         .gps-status {
             padding: 15px;
             border-radius: 6px;
@@ -151,7 +150,6 @@
 
         .hidden { display: none; }
 
-        /* VISTA DE ÉXITO PROFESIONAL */
         .success-screen {
             text-align: center;
             padding: 20px 10px;
@@ -181,7 +179,7 @@
 
 <div class="card" id="appCard">
     <div class="header">
-        <h1>Control de Despachos</h1>
+        <h1>REGISTRO DE ASISTENCIA</h1>
         <div id="placaBadge" class="placa-badge">---</div>
     </div>
 
@@ -191,14 +189,15 @@
 
     <form id="dispatchForm" class="hidden">
         
+        <!-- VISTA DE TÉCNICOS CORREGIDA -->
         <div id="camposTecnico" class="hidden">
             <div class="form-group">
-                <label for="tecnico1">Coloque su Nombre Completo</label>
-                <input type="text" id="tecnico1" placeholder="Ej. JUAN PÉREZ GÓMEZ" autocomplete="off">
+                <label for="tecnico1">TECNICO 1</label>
+                <input type="text" id="tecnico1" placeholder="COLOQUE SU NOMBRE COMPLETO" autocomplete="off">
             </div>
             <div class="form-group">
-                <label for="tecnico2">Nombre Completo del Acompañante (Copiloto)</label>
-                <input type="text" id="tecnico2" placeholder="Ej. CARLOS LÓPEZ (OPCIONAL)" autocomplete="off">
+                <label for="tecnico2">TECNICO 2</label>
+                <input type="text" id="tecnico2" placeholder="COLOQUE SU NOMBRE COMPLETO" autocomplete="off">
             </div>
             <div class="form-group">
                 <label for="kilometraje">Kilometraje Entrada</label>
@@ -206,10 +205,11 @@
             </div>
         </div>
 
+        <!-- VISTA DE COORDINADOR CORREGIDA -->
         <div id="camposCoordinador" class="hidden">
             <div class="form-group">
-                <label for="coordinador">Coloque su Nombre Completo</label>
-                <input type="text" id="coordinador" placeholder="Ej. MARÍA FERNÁNDEZ ROJAS" autocomplete="off">
+                <label for="coordinador">COORDINADOR</label>
+                <input type="text" id="coordinador" placeholder="COLOQUE SU NOMBRE COMPLETO" autocomplete="off">
             </div>
         </div>
 
@@ -224,7 +224,7 @@
 </div>
 
 <script>
-    // CAMBIA ESTA URL POR LA DE TU DESPLIEGUE REAL DE GOOGLE APPS SCRIPT
+    // Reemplaza esto con tu URL de Google Apps Script real
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzlxNGfCFnx6Eb7MuRJi4VhwLZVzIrcw_iDQv7zUWeW1f5SBrq20kirRqnmxRwHZKU9Vw/exec";
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -234,18 +234,15 @@
     let rolDetectado = "";
     let identificadorDetectado = "";
 
-    // FILTRO EN TIEMPO REAL: Sanitización Anti-Malware e Inyecciones
     function inicializarSanitizadores() {
         const textInputs = document.querySelectorAll('input[type="text"]');
         textInputs.forEach(input => {
             input.addEventListener("input", (e) => {
-                // Remueve caracteres estructurales maliciosos inmediatamente al tipear
                 let valorLimpio = e.target.value.replace(/[<>\/\\"'`${}[\]]/g, "");
-                e.target.value = valorLimpio.toUpperCase(); // Forzar mayúsculas estéticas
+                e.target.value = valorLimpio.toUpperCase();
             });
         });
 
-        // Forzar solo números en Kilometraje
         const kilInput = document.getElementById("kilometraje");
         if(kilInput) {
             kilInput.addEventListener("input", (e) => {
@@ -254,7 +251,6 @@
         }
     }
 
-    // Inicialización del Sistema
     document.addEventListener("DOMContentLoaded", () => {
         inicializarSanitizadores();
         
@@ -264,7 +260,6 @@
         }
 
         try {
-            // Descifrado local Base64 para adaptar UI
             const decoded = atob(token);
             const parts = decoded.split("|");
             if (parts.length !== 2) throw new Error();
@@ -272,15 +267,13 @@
             rolDetectado = parts[0].toUpperCase();
             identificadorDetectado = parts[1].toUpperCase();
 
-            // Configurar cabecera limpia (Eliminado ROL de la vista)
             const badge = document.getElementById("placaBadge");
             if (rolDetectado === "SUPERVISOR") {
-                badge.innerText = "COORDINACIÓN ADMINISTRATIVA";
+                badge.innerText = "COORDINADOR";
             } else {
                 badge.innerText = `PLACA: ${identificadorDetectado}`;
             }
 
-            // Validar e inicializar diagnóstico de GPS
             verificarSeñalGPS();
 
         } catch (e) {
@@ -288,7 +281,6 @@
         }
     });
 
-    // Diagnóstico asíncrono y amigable del GPS
     function verificarSeñalGPS() {
         if (!navigator.geolocation) {
             bloquearFormulario("Hardware Incompatible", "Este dispositivo móvil no cuenta con componentes de geolocalización activos.");
@@ -298,8 +290,6 @@
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 gpsCoordinates = `${position.coords.latitude},${position.coords.longitude}`;
-                
-                // Transición limpia: GPS activo -> Oculta loading, muestra campos correctos
                 document.getElementById("gpsStatus").className = "hidden";
                 
                 const form = document.getElementById("dispatchForm");
@@ -317,13 +307,12 @@
                 document.getElementById("btnSubmit").disabled = false;
             },
             (error) => {
-                // GPS Desactivado o Rechazado: Despliega mensaje amigable exacto solicitado
+                // MENSAJE DE ERROR DE GPS EXACTO SOLICITADO
                 const banner = document.getElementById("gpsStatus");
                 banner.className = "gps-status gps-error";
                 banner.innerHTML = `
                     <h3>📡 Se requiere acceso a la ubicación</h3>
-                    Para registrar el despacho de la unidad, es necesario activar el GPS en su dispositivo. 
-                    Una vez activado, por favor <strong>recargue la página</strong> o <strong>vuelva a escanear el código QR</strong> para continuar.
+                    Para registrar su asistencia, debe activar el GPS de su dispositivo. Una vez activado, por favor recargue la página o vuelva a escanear el código QR para continuar.
                 `;
                 document.getElementById("btnSubmit").disabled = true;
             },
@@ -331,7 +320,6 @@
         );
     }
 
-    // Envío seguro del Formulario
     document.getElementById("dispatchForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         if (!gpsCoordinates) return;
@@ -357,7 +345,6 @@
                 body: JSON.stringify(payload)
             });
 
-            // Transición elegante a Pantalla de Salida Profesional
             document.getElementById("dispatchForm").classList.add("hidden");
             document.getElementById("gpsStatus").classList.add("hidden");
             document.getElementById("successScreen").classList.remove("hidden");
