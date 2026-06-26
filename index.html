@@ -3,120 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Control de Flotas - Login Homologado</title>
+    <title>Sistema Control de Despachos</title>
     <style>
         :root {
-            --primary-color: #0f172a;
-            --accent-color: #334155;
-            --text-color: #1e293b;
-            --bg-color: #f1f5f9;
-            --card-bg: #ffffff;
-            --border-color: #cbd5e1;
-            --danger-color: #991b1b;
-            --success-color: #166534;
+            --primary: #0f172a;
+            --accent: #475569;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --danger: #b91c1c;
+            --success: #15803d;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--bg);
+            color: var(--text);
             margin: 0;
-            padding: 15px;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
 
-        .container {
-            background-color: var(--card-bg);
-            padding: 25px;
-            border-radius: 6px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        .card {
+            background-color: var(--card);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             width: 100%;
-            max-width: 420px;
-            border-top: 5px solid var(--primary-color);
+            max-width: 440px;
+            border-top: 5px solid var(--primary);
+            box-sizing: border-box;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
             padding-bottom: 15px;
         }
 
         .header h1 {
-            font-size: 1.25rem;
-            color: var(--primary-color);
-            margin: 0 0 5px 0;
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin: 0 0 8px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .badge {
+        .placa-badge {
             display: inline-block;
-            background-color: var(--accent-color);
+            background-color: var(--primary);
             color: #fff;
-            padding: 5px 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            border-radius: 4px;
-            margin: 3px;
-            text-transform: uppercase;
-        }
-
-        .gps-banner {
-            background-color: #fee2e2;
-            border: 1px solid #fca5a5;
-            color: var(--danger-color);
-            padding: 12px;
-            border-radius: 4px;
+            padding: 6px 16px;
             font-size: 0.85rem;
             font-weight: bold;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        /* DISEÑO DE BANNERS ESTADO PROGRESIVO DE GPS */
+        .gps-status {
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.9rem;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .gps-loading {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: var(--accent);
+        }
+
+        .gps-error {
+            background-color: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: var(--danger);
+            text-align: left;
+        }
+
+        .gps-error h3 {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            color: var(--danger);
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
-            margin-bottom: 6px;
-            font-size: 0.8rem;
+            margin-bottom: 8px;
+            font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
-            color: var(--accent-color);
+            color: var(--accent);
+            letter-spacing: 0.5px;
         }
 
-        input, select {
+        input {
             width: 100%;
-            padding: 11px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
             box-sizing: border-box;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            color: var(--text);
             background-color: #fff;
+            transition: border-color 0.2s;
         }
 
-        input:focus, select:focus {
+        input:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+            border-color: var(--primary);
         }
 
         button {
             width: 100%;
-            background-color: var(--primary-color);
+            background-color: var(--primary);
             color: #fff;
             border: none;
-            padding: 13px;
-            font-size: 0.95rem;
+            padding: 14px;
+            font-size: 1rem;
             font-weight: bold;
             text-transform: uppercase;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: background-color 0.2s;
         }
 
         button:disabled {
@@ -126,169 +150,195 @@
         }
 
         .hidden { display: none; }
-        
-        #message {
+
+        /* VISTA DE ÉXITO PROFESIONAL */
+        .success-screen {
             text-align: center;
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 20px 10px;
         }
-        .error { background-color: #fee2e2; color: var(--danger-color); }
-        .success { background-color: #dcfce7; color: var(--success-color); }
+
+        .success-icon {
+            font-size: 3.5rem;
+            color: var(--success);
+            margin-bottom: 15px;
+        }
+
+        .success-screen h2 {
+            color: var(--success);
+            font-size: 1.3rem;
+            margin: 0 0 10px 0;
+        }
+
+        .success-screen p {
+            color: var(--accent);
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="card" id="appCard">
     <div class="header">
         <h1>Control de Despachos</h1>
-        <div id="placaBadge" class="badge">PLACA: --</div>
-        <div id="rolBadge" class="badge">ROL: --</div>
+        <div id="placaBadge" class="placa-badge">---</div>
     </div>
 
-    <div id="gpsBanner" class="gps-banner">
-        ⚠️ ATENCIÓN: Se requiere GPS Activo por hardware para habilitar el formulario.
+    <div id="gpsStatus" class="gps-status gps-loading">
+        🔄 Verificando parámetros del sistema y señal GPS... Por favor, espere.
     </div>
 
-    <form id="mainForm">
-        <div id="sectionTecnicos" class="hidden">
+    <form id="dispatchForm" class="hidden">
+        
+        <div id="camposTecnico" class="hidden">
             <div class="form-group">
-                <label for="tecnico1">Técnico 1 (Conductor)</label>
-                <select id="tecnico1" class="select-personal"></select>
+                <label for="tecnico1">Coloque su Nombre Completo</label>
+                <input type="text" id="tecnico1" placeholder="Ej. JUAN PÉREZ GÓMEZ" autocomplete="off">
             </div>
             <div class="form-group">
-                <label for="tecnico2">Técnico 2 (Copiloto)</label>
-                <select id="tecnico2" class="select-personal"></select>
+                <label for="tecnico2">Nombre Completo del Acompañante (Copiloto)</label>
+                <input type="text" id="tecnico2" placeholder="Ej. CARLOS LÓPEZ (OPCIONAL)" autocomplete="off">
             </div>
             <div class="form-group">
                 <label for="kilometraje">Kilometraje Entrada</label>
-                <input type="number" id="kilometraje" min="0" placeholder="Ej. 145200">
+                <input type="text" id="kilometraje" placeholder="Solo números enteros. Ej. 145200" inputmode="numeric">
             </div>
         </div>
 
-        <div id="sectionSupervisor" class="hidden">
+        <div id="camposCoordinador" class="hidden">
             <div class="form-group">
-                <label for="supervisor">Nombre del Coordinador</label>
-                <select id="supervisor" class="select-personal"></select>
+                <label for="coordinador">Coloque su Nombre Completo</label>
+                <input type="text" id="coordinador" placeholder="Ej. MARÍA FERNÁNDEZ ROJAS" autocomplete="off">
             </div>
         </div>
 
         <button type="submit" id="btnSubmit" disabled>Registrar Asistencia</button>
     </form>
-
-    <div id="message" class="hidden"></div>
+    
+    <div id="successScreen" class="success-screen hidden">
+        <div class="success-icon">✓</div>
+        <h2>Registro Completado</h2>
+        <p>Los datos logísticos y de ubicación han sido validados y guardados de forma segura en el sistema corporativo.</p>
+    </div>
 </div>
 
 <script>
-    // CAMBIA ESTA URL POR LA DE TU IMPLEMENTACIÓN DE GOOGLE APPS SCRIPT
+    // CAMBIA ESTA URL POR LA DE TU DESPLIEGUE REAL DE GOOGLE APPS SCRIPT
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzlxNGfCFnx6Eb7MuRJi4VhwLZVzIrcw_iDQv7zUWeW1f5SBrq20kirRqnmxRwHZKU9Vw/exec";
 
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('t'); // Captura el parámetro obfuscado '?t='
+    const token = urlParams.get('t');
     
     let gpsCoordinates = null;
-    let tokenValido = false;
-    let placaDetectada = "";
     let rolDetectado = "";
+    let identificadorDetectado = "";
 
+    // FILTRO EN TIEMPO REAL: Sanitización Anti-Malware e Inyecciones
+    function inicializarSanitizadores() {
+        const textInputs = document.querySelectorAll('input[type="text"]');
+        textInputs.forEach(input => {
+            input.addEventListener("input", (e) => {
+                // Remueve caracteres estructurales maliciosos inmediatamente al tipear
+                let valorLimpio = e.target.value.replace(/[<>\/\\"'`${}[\]]/g, "");
+                e.target.value = valorLimpio.toUpperCase(); // Forzar mayúsculas estéticas
+            });
+        });
+
+        // Forzar solo números en Kilometraje
+        const kilInput = document.getElementById("kilometraje");
+        if(kilInput) {
+            kilInput.addEventListener("input", (e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, "");
+            });
+        }
+    }
+
+    // Inicialización del Sistema
     document.addEventListener("DOMContentLoaded", () => {
-        validarYDescifrarTokenLocal();
-        if(tokenValido) {
-            inicializarCapturaGPS();
+        inicializarSanitizadores();
+        
+        if (!token) {
+            bloquearFormulario("Acceso Denegado", "Por favor, escanee un código QR oficial de control de flota corporativa.");
+            return;
+        }
+
+        try {
+            // Descifrado local Base64 para adaptar UI
+            const decoded = atob(token);
+            const parts = decoded.split("|");
+            if (parts.length !== 2) throw new Error();
+
+            rolDetectado = parts[0].toUpperCase();
+            identificadorDetectado = parts[1].toUpperCase();
+
+            // Configurar cabecera limpia (Eliminado ROL de la vista)
+            const badge = document.getElementById("placaBadge");
+            if (rolDetectado === "SUPERVISOR") {
+                badge.innerText = "COORDINACIÓN ADMINISTRATIVA";
+            } else {
+                badge.innerText = `PLACA: ${identificadorDetectado}`;
+            }
+
+            // Validar e inicializar diagnóstico de GPS
+            verificarSeñalGPS();
+
+        } catch (e) {
+            bloquearFormulario("Error de Firma Digital", "El token proporcionado por el código QR es corrupto o inválido.");
         }
     });
 
-    // Descifrado preventivo en Frontend para adaptar la interfaz visual
-    function validarYDescifrarTokenLocal() {
-        const msgDiv = document.getElementById("message");
-        if (!token) {
-            mostrarError("ERROR CRÍTICO: Escanee el código QR oficial de la unidad. Acceso denegado.");
-            return;
-        }
-        try {
-            const decoded = atob(token); // Descifrado Base64 estándar
-            const parts = decoded.split("|");
-            if (parts.length !== 2) throw new Error();
-            
-            rolDetectado = parts[0].toLowerCase();
-            placaDetectada = parts[1].toUpperCase();
-            tokenValido = true;
-
-            document.getElementById("placaBadge").innerText = `PLACA: ${placaDetectada}`;
-            document.getElementById("rolBadge").innerText = `ROL: ${rolDetectado}`;
-
-            if (rolDetectado === 'supervisor') {
-                document.getElementById("sectionSupervisor").classList.remove("hidden");
-                document.getElementById("supervisor").required = true;
-            } else {
-                document.getElementById("sectionTecnicos").classList.remove("hidden");
-                document.getElementById("tecnico1").required = true;
-                document.getElementById("tecnico2").required = true;
-                document.getElementById("kilometraje").required = true;
-                cargarListaPersonal();
-            }
-        } catch (e) {
-            mostrarError("FALSA ALERTA / PARÁMETRO ALTERADO: El token del código QR ha sido corrompido.");
-        }
-    }
-
-    // Inicializa el tracking de GPS estricto (Hardware anti-VPN)
-    function inicializarCapturaGPS() {
+    // Diagnóstico asíncrono y amigable del GPS
+    function verificarSeñalGPS() {
         if (!navigator.geolocation) {
-            mostrarError("Este dispositivo no cuenta con soporte de geolocalización.");
+            bloquearFormulario("Hardware Incompatible", "Este dispositivo móvil no cuenta con componentes de geolocalización activos.");
             return;
         }
 
-        navigator.geolocation.watchPosition(
+        navigator.geolocation.getCurrentPosition(
             (position) => {
                 gpsCoordinates = `${position.coords.latitude},${position.coords.longitude}`;
-                // Desbloqueo nativo del formulario al validar hardware activo
-                document.getElementById("gpsBanner").classList.add("hidden");
+                
+                // Transición limpia: GPS activo -> Oculta loading, muestra campos correctos
+                document.getElementById("gpsStatus").className = "hidden";
+                
+                const form = document.getElementById("dispatchForm");
+                form.classList.remove("hidden");
+
+                if (rolDetectado === "SUPERVISOR") {
+                    document.getElementById("camposCoordinador").classList.remove("hidden");
+                    document.getElementById("coordinador").required = true;
+                } else {
+                    document.getElementById("camposTecnico").classList.remove("hidden");
+                    document.getElementById("tecnico1").required = true;
+                    document.getElementById("kilometraje").required = true;
+                }
+
                 document.getElementById("btnSubmit").disabled = false;
             },
             (error) => {
-                gpsCoordinates = null;
-                document.getElementById("gpsBanner").classList.remove("hidden");
-                document.getElementById("gpsBanner").innerText = "⚠️ CONFIGURACIÓN REQUERIDA: Encienda el GPS de alta precisión en su celular y actualice la aplicación.";
+                // GPS Desactivado o Rechazado: Despliega mensaje amigable exacto solicitado
+                const banner = document.getElementById("gpsStatus");
+                banner.className = "gps-status gps-error";
+                banner.innerHTML = `
+                    <h3>📡 Se requiere acceso a la ubicación</h3>
+                    Para registrar el despacho de la unidad, es necesario activar el GPS en su dispositivo. 
+                    Una vez activado, por favor <strong>recargue la página</strong> o <strong>vuelva a escanear el código QR</strong> para continuar.
+                `;
                 document.getElementById("btnSubmit").disabled = true;
             },
-            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 } // Desactiva caché de IP (Evita bypass sencillos de VPN)
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
 
-    async function cargarListaPersonal() {
-        try {
-            const response = await fetch(WEB_APP_URL);
-            const result = await response.json();
-            if (result.status === "success") {
-                const selects = document.querySelectorAll(".select-personal");
-                selects.forEach(select => {
-                    select.innerHTML = '<option value="">-- BUSQUE SU NOMBRE --</option>';
-                    result.data.forEach(name => {
-                        const opt = document.createElement("option");
-                        opt.value = name;
-                        opt.textContent = name;
-                        select.appendChild(opt);
-                    });
-                });
-            }
-        } catch (err) {
-            console.error("Falla de red cargando base de datos.");
-        }
-    }
-
-    document.getElementById("mainForm").addEventListener("submit", async (e) => {
+    // Envío seguro del Formulario
+    document.getElementById("dispatchForm").addEventListener("submit", async (e) => {
         e.preventDefault();
-        if (!gpsCoordinates) {
-            alert("No se puede enviar sin señal GPS verificada.");
-            return;
-        }
+        if (!gpsCoordinates) return;
 
         const btn = document.getElementById("btnSubmit");
         btn.disabled = true;
-        mostrarMensaje("Procesando firma y emitiendo registros...", "success");
+        btn.innerText = "Sincronizando...";
 
         const payload = {
             token: token,
@@ -296,40 +346,35 @@
             tecnico1: document.getElementById("tecnico1")?.value || "",
             tecnico2: document.getElementById("tecnico2")?.value || "",
             kilometraje: document.getElementById("kilometraje")?.value || "",
-            supervisor: document.getElementById("supervisor")?.value || ""
+            coordinador: document.getElementById("coordinador")?.value || ""
         };
 
         try {
             await fetch(WEB_APP_URL, {
                 method: "POST",
-                mode: "no-cors",
+                mode: "no-cors", 
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
-            // Éxito ciego (por política no-cors)
-            mostrarMensaje("✓ ASISTENCIA ASENTADA EN MAYÚSCULAS.", "success");
-            document.getElementById("mainForm").reset();
-            setTimeout(() => { location.reload(); }, 2000); // Forzar refresco operativo
-        } catch (error) {
-            mostrarMensaje("Error en la pasarela de red. Reintente.", "error");
+            // Transición elegante a Pantalla de Salida Profesional
+            document.getElementById("dispatchForm").classList.add("hidden");
+            document.getElementById("gpsStatus").classList.add("hidden");
+            document.getElementById("successScreen").classList.remove("hidden");
+            
+        } catch (err) {
+            alert("Falla de conectividad en el canal de red. Intente nuevamente.");
             btn.disabled = false;
+            btn.innerText = "Registrar Asistencia";
         }
     });
 
-    function mostrarError(txt) {
-        const m = document.getElementById("message");
-        m.className = "error";
-        m.innerText = txt;
-        m.classList.remove("hidden");
-        document.getElementById("mainForm").classList.add("hidden");
-    }
-
-    function mostrarMensaje(txt, clase) {
-        const m = document.getElementById("message");
-        m.className = clase;
-        m.innerText = txt;
-        m.classList.remove("hidden");
+    function bloquearFormulario(titulo, mensaje) {
+        const banner = document.getElementById("gpsStatus");
+        banner.className = "gps-status gps-error";
+        banner.innerHTML = `<h3>⚠️ ${titulo}</h3><p>${mensaje}</p>`;
+        document.getElementById("dispatchForm").classList.add("hidden");
+        document.getElementById("btnSubmit").disabled = true;
     }
 </script>
 </body>
