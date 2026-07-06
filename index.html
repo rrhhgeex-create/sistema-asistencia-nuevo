@@ -65,6 +65,33 @@
             letter-spacing: 1px;
         }
 
+        .toggle-container {
+            display: flex;
+            background-color: #f1f5f9;
+            padding: 4px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--accent);
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .toggle-btn.active {
+            background-color: #fff;
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
         .gps-status {
             padding: 15px;
             border-radius: 6px;
@@ -75,78 +102,17 @@
             line-height: 1.4;
         }
 
-        .gps-loading {
-            background-color: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            color: var(--accent);
-        }
-
-        .gps-error {
-            background-color: #fef2f2;
-            border: 1px solid #fee2e2;
-            color: var(--danger);
-        }
-
-        .gps-error h3 {
-            margin: 0 0 5px 0;
-            font-size: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--accent);
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 1rem;
-            color: var(--text);
-            background-color: #fff;
-        }
-
-        button {
-            width: 100%;
-            background-color: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 14px;
-            font-size: 1rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:disabled {
-            background-color: #cbd5e1;
-            color: #94a3b8;
-            cursor: not-allowed;
-        }
-
+        .gps-loading { background-color: #f1f5f9; border: 1px solid #cbd5e1; color: var(--accent); }
+        .gps-error { background-color: #fef2f2; border: 1px solid #fee2e2; color: var(--danger); }
+        .gps-error h3 { margin: 0 0 5px 0; font-size: 1rem; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--accent); }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; font-size: 1rem; color: var(--text); background-color: #fff; }
+        button.submit-btn { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 14px; font-size: 1rem; font-weight: bold; text-transform: uppercase; border-radius: 5px; cursor: pointer; }
+        button:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
         .hidden { display: none; }
-
-        .success-screen {
-            text-align: center;
-            padding: 20px 10px;
-        }
-
-        .success-icon {
-            font-size: 3.5rem;
-            color: var(--success);
-            margin-bottom: 15px;
-        }
+        .success-screen { text-align: center; padding: 20px 10px; }
+        .success-icon { font-size: 3.5rem; color: var(--success); margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -157,32 +123,41 @@
         <div id="placaBadge" class="placa-badge">---</div>
     </div>
 
+    <!-- CONMUTADOR DINÁMICO DE ROL INTERNO (SOLO VISIBLE PARA QR DE SUPERVISOR) -->
+    <div id="selectorVistaInterna" class="toggle-container hidden">
+        <button type="button" class="toggle-btn active" id="btnVistaCoord" onclick="cambiarSubVista('COORD')">Coordinador</button>
+        <button type="button" class="toggle-btn" id="btnVistaAdmin" onclick="cambiarSubVista('ADMIN')">Administrativo</button>
+    </div>
+
     <div id="gpsStatus" class="gps-status gps-loading">
         🔄 Verificando parámetros del sistema y señal GPS... Por favor, espere.
     </div>
 
     <form id="mainForm" class="hidden">
         
+        <!-- DATALISTS GLOBALES SIN DUPLICADOS -->
         <datalist id="listaPersonalNombres"></datalist>
         <datalist id="listaPersonalUsuarios"></datalist>
+        <datalist id="listaAdminNombres"></datalist>
 
+        <!-- VISTA: TÉCNICOS -->
         <div id="camposTecnico" class="hidden">
             <div class="form-group">
                 <label>TECNICO 1</label>
-                <input type="text" id="t1Nombre" list="listaPersonalNombres" placeholder="COLOQUE SU NOMBRE COMPLETO">
+                <input type="text" id="t1Nombre" list="listaPersonalNombres" placeholder="COLOQUE SU NOMBRE COMPLETO" autocomplete="off">
             </div>
             <div class="form-group">
                 <label>USUARIO TECNICO 1</label>
-                <input type="text" id="t1Usuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO">
+                <input type="text" id="t1Usuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO" autocomplete="off">
             </div>
             
             <div class="form-group">
                 <label>TECNICO 2</label>
-                <input type="text" id="t2Nombre" list="listaPersonalNombres" placeholder="COLOQUE SU NOMBRE COMPLETO">
+                <input type="text" id="t2Nombre" list="listaPersonalNombres" placeholder="COLOQUE SU NOMBRE COMPLETO" autocomplete="off">
             </div>
             <div class="form-group">
                 <label>USUARIO TECNICO 2</label>
-                <input type="text" id="t2Usuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO">
+                <input type="text" id="t2Usuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO" autocomplete="off">
             </div>
 
             <div class="form-group">
@@ -191,18 +166,37 @@
             </div>
         </div>
 
+        <!-- VISTA: COORDINADOR -->
         <div id="camposCoordinador" class="hidden">
             <div class="form-group">
                 <label>COORDINADOR</label>
-                <input type="text" id="coordinadorNombre" list="listaPersonalNombres" placeholder="COLOQUE SU NOMBRE COMPLETO">
+                <input type="text" id="coordinadorNombre" list="listaPersonalNombres" placeholder="COLOQUE SU NOMBRE COMPLETO" autocomplete="off">
             </div>
             <div class="form-group">
                 <label>USUARIO COORDINADOR</label>
-                <input type="text" id="coordinadorUsuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO">
+                <input type="text" id="coordinadorUsuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO" autocomplete="off">
             </div>
         </div>
 
-        <button type="submit" id="btnSubmit" disabled>Registrar Asistencia</button>
+        <!-- VISTA: PERSONAL ADMINISTRATIVO (NUEVA) -->
+        <div id="camposAdministrativo" class="hidden">
+            <div class="form-group">
+                <label>ELEGIR CARGO</label>
+                <select id="adminCargo">
+                    <option value="">-- SELECCIONE UN CARGO --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>NOMBRE COMPLETO</label>
+                <input type="text" id="adminNombre" list="listaAdminNombres" placeholder="BUSQUE O DIGITE SU NOMBRE" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>USUARIO ADMINISTRATIVO</label>
+                <input type="text" id="adminUsuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO" autocomplete="off">
+            </div>
+        </div>
+
+        <button type="submit" id="btnSubmit" class="submit-btn" disabled>Registrar Asistencia</button>
     </form>
     
     <div id="successScreen" class="success-screen hidden">
@@ -213,8 +207,7 @@
 </div>
 
 <script>
-    // URL de tu implementación de Google Apps Script Ejecutable
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkd0I3NGhwznZjlsWbB1lozY6UxCRQe4apYadSljRWgFCZ7tgz9ue0ysB2SSINKijDpw/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkd0I3NGhwznZjlsWbB1lozY6UxCRQe4apYadSljRWgFCZ7tgz9ue0ysB2SSINKijDpw/exec"; // Coloca tu URL /exec aquí
 
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('t');
@@ -222,7 +215,10 @@
     let gpsCoordinates = null;
     let rolDetectado = "";
     let identificadorDetectado = "";
-    let databasePersonal = [];
+    let subVistaActiva = "COORD"; 
+    
+    let databasePersonal = [];     // Técnicos y Coordinadores
+    let databaseAdministrativo = []; // Resto del personal administrativo
 
     document.addEventListener("DOMContentLoaded", async () => {
         setupSanitizers();
@@ -234,17 +230,16 @@
             rolDetectado = parts[0].toUpperCase();
             identificadorDetectado = parts[1].toUpperCase();
 
-            document.getElementById("placaBadge").innerText = (rolDetectado === "SUPERVISOR") ? "COORDINADOR" : `PLACA: ${identificadorDetectado}`;
-            
-            // Descargar lista del personal activo en segundo plano
-            await cargarBasePersonal();
-            
-            // Si es Técnico, validar que la placa esté OPERATIVA antes de habilitar el flujo
-            if (rolDetectado === "TECNICO") {
+            if (rolDetectado === "SUPERVISOR") {
+                document.getElementById("placaBadge").innerText = "INTERNO / ADMIN";
+                document.getElementById("selectorVistaInterna").classList.remove("hidden");
+            } else {
+                document.getElementById("placaBadge").innerText = `PLACA: ${identificadorDetectado}`;
                 const esOperativa = await validarUnidadOperativa(identificadorDetectado);
                 if (!esOperativa) return showGlobalError("Unidad No Operativa", "Esta placa no se encuentra marcada como OPERATIVA.");
             }
 
+            await cargarBasePersonal();
             iniciarValidacionGPS();
         } catch(e) {
             showGlobalError("Token Inválido", "El código QR escaneado no pertenece al sistema corporativo.");
@@ -254,21 +249,97 @@
     async function cargarBasePersonal() {
         try {
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getListaPersonal`);
-            databasePersonal = await res.json();
+            const rawData = await res.json();
             
-            const dlNombres = document.getElementById("listaPersonalNombres");
-            const dlUsuarios = document.getElementById("listaPersonalUsuarios");
-            
-            databasePersonal.forEach(p => {
-                dlNombres.innerHTML += `<option value="${p.nombre}">`;
-                dlUsuarios.innerHTML += `<option value="${p.usuario}">`;
+            // Filtrar y separar la data según el Cargo
+            rawData.forEach(p => {
+                const cargoUpper = p.cargo.toUpperCase();
+                if (cargoUpper.includes("TECNICO") || cargoUpper.includes("COORDINADOR")) {
+                    databasePersonal.push(p);
+                } else {
+                    databaseAdministrativo.push(p);
+                }
             });
 
-            // Enlace inteligente interactivo para autocompletar Usuarios <-> Nombres
-            setupEnlaceCampos("t1Nombre", "t1Usuario");
-            setupEnlaceCampos("t2Nombre", "t2Usuario");
-            setupEnlaceCampos("coordinadorNombre", "coordinadorUsuario");
-        } catch(e) { console.log("Error al precargar personal."); }
+            // PROCESAMIENTO ANTI-DUPLICADOS (USANDO SETS)
+            const nombresUnicos = [...new Set(databasePersonal.map(p => p.nombre))];
+            const usuariosUnicos = [...new Set(rawData.map(p => p.usuario))]; // Todos los usuarios del sistema sin duplicar
+            const cargosAdminUnicos = [...new Set(databaseAdministrativo.map(p => p.cargo))];
+            const nombresAdminUnicos = [...new Set(databaseAdministrativo.map(p => p.nombre))];
+
+            // Inyectar en Datalists
+            const dlNombres = document.getElementById("listaPersonalNombres");
+            nombresUnicos.forEach(n => dlNombres.innerHTML += `<option value="${n}">`);
+
+            const dlUsuarios = document.getElementById("listaPersonalUsuarios");
+            usuariosUnicos.forEach(u => dlUsuarios.innerHTML += `<option value="${u}">`);
+
+            const dlAdminNombres = document.getElementById("listaAdminNombres");
+            nombresAdminUnicos.forEach(na => dlAdminNombres.innerHTML += `<option value="${na}">`);
+
+            const selectCargo = document.getElementById("adminCargo");
+            cargosAdminUnicos.forEach(c => selectCargo.innerHTML += `<option value="${c}">${c}</option>`);
+
+            // Inicializar enlace de primera entrada rompible
+            setupEnlaceCamposInteractivos("t1Nombre", "t1Usuario", databasePersonal);
+            setupEnlaceCamposInteractivos("t2Nombre", "t2Usuario", databasePersonal);
+            setupEnlaceCamposInteractivos("coordinadorNombre", "coordinadorUsuario", databasePersonal);
+            setupEnlaceCamposInteractivos("adminNombre", "adminUsuario", databaseAdministrativo);
+
+        } catch(e) { console.error("Error cargando base de datos de personal", e); }
+    }
+
+    // ALGORITMO: Enlace inteligente de primera entrada (Rompible al digitar libremente)
+    function setupEnlaceCamposInteractivos(idNombre, idUsuario, datasource) {
+        const inputNombre = document.getElementById(idNombre);
+        const inputUsuario = document.getElementById(idUsuario);
+        if(!inputNombre || !inputUsuario) return;
+
+        let autocompletando = false;
+
+        inputNombre.addEventListener("input", (e) => {
+            if (autocompletando) return;
+            const val = e.target.value.toUpperCase().trim();
+            const match = datasource.find(p => p.nombre.toUpperCase() === val);
+            
+            if (match) {
+                autocompletando = true;
+                inputUsuario.value = match.usuario;
+                autocompletando = false;
+            }
+        });
+
+        inputUsuario.addEventListener("input", (e) => {
+            if (autocompletando) return;
+            const val = e.target.value.toUpperCase().trim();
+            const match = datasource.find(p => p.usuario.toUpperCase() === val);
+            
+            if (match) {
+                autocompletando = true;
+                inputNombre.value = match.nombre;
+                autocompletando = false;
+            }
+        });
+    }
+
+    function cambiarSubVista(tipo) {
+        subVistaActiva = tipo;
+        document.getElementById("btnVistaCoord").classList.toggle("active", tipo === 'COORD');
+        document.getElementById("btnVistaAdmin").classList.toggle("active", tipo === 'ADMIN');
+        
+        if (tipo === 'COORD') {
+            document.getElementById("camposCoordinador").classList.remove("hidden");
+            document.getElementById("camposAdministrativo").classList.add("hidden");
+            document.getElementById("coordinadorNombre").required = true;
+            document.getElementById("adminCargo").required = false;
+            document.getElementById("adminNombre").required = false;
+        } else {
+            document.getElementById("camposCoordinador").classList.add("hidden");
+            document.getElementById("camposAdministrativo").classList.remove("hidden");
+            document.getElementById("coordinadorNombre").required = false;
+            document.getElementById("adminCargo").required = true;
+            document.getElementById("adminNombre").required = true;
+        }
     }
 
     async function validarUnidadOperativa(placa) {
@@ -277,22 +348,6 @@
             const obj = await res.json();
             return obj.operativa;
         } catch(e) { return false; }
-    }
-
-    function setupEnlaceCampos(idNombre, idUsuario) {
-        const inputNombre = document.getElementById(idNombre);
-        const inputUsuario = document.getElementById(idUsuario);
-        if(!inputNombre || !inputUsuario) return;
-
-        inputNombre.addEventListener("change", (e) => {
-            const match = databasePersonal.find(p => p.nombre === e.target.value);
-            if(match) inputUsuario.value = match.usuario;
-        });
-
-        inputUsuario.addEventListener("change", (e) => {
-            const match = databasePersonal.find(p => p.usuario === e.target.value.toUpperCase());
-            if(match) inputNombre.value = match.nombre;
-        });
     }
 
     function iniciarValidacionGPS() {
@@ -305,8 +360,7 @@
                 document.getElementById("mainForm").classList.remove("hidden");
 
                 if (rolDetectado === "SUPERVISOR") {
-                    document.getElementById("camposCoordinador").classList.remove("hidden");
-                    document.getElementById("coordinadorNombre").required = true;
+                    cambiarSubVista("COORD"); // Por defecto abre en Coordinador
                 } else {
                     document.getElementById("camposTecnico").classList.remove("hidden");
                     document.getElementById("t1Nombre").required = true;
@@ -331,18 +385,22 @@
         e.preventDefault();
         const btn = document.getElementById("btnSubmit");
         btn.disabled = true;
-        btn.innerText = "Registrando...";
+        btn.innerText = "Sincronizando...";
 
         const payload = {
             token: token,
             gps: gpsCoordinates,
+            esAdministrativo: (rolDetectado === "SUPERVISOR" && subVistaActiva === "ADMIN"),
             t1Nombre: document.getElementById("t1Nombre")?.value || "",
             t1Usuario: document.getElementById("t1Usuario")?.value || "",
             t2Nombre: document.getElementById("t2Nombre")?.value || "",
             t2Usuario: document.getElementById("t2Usuario")?.value || "",
             kilometraje: document.getElementById("kilometraje")?.value || "",
             coordinadorNombre: document.getElementById("coordinadorNombre")?.value || "",
-            coordinadorUsuario: document.getElementById("coordinadorUsuario")?.value || ""
+            coordinadorUsuario: document.getElementById("coordinadorUsuario")?.value || "",
+            adminCargo: document.getElementById("adminCargo")?.value || "",
+            adminNombre: document.getElementById("adminNombre")?.value || "",
+            adminUsuario: document.getElementById("adminUsuario")?.value || ""
         };
 
         try {
@@ -352,10 +410,12 @@
                 body: JSON.stringify(payload)
             });
             document.getElementById("mainForm").classList.add("hidden");
+            document.getElementById("selectorVistaInterna").classList.add("hidden");
             document.getElementById("successScreen").classList.remove("hidden");
         } catch(err) {
-            alert("Error de red.");
+            alert("Error crítico en el canal de comunicación.");
             btn.disabled = false;
+            btn.innerText = "Registrar Asistencia";
         }
     });
 
