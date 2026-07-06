@@ -85,15 +85,11 @@
             background-color: #fef2f2;
             border: 1px solid #fee2e2;
             color: var(--danger);
-            text-align: left;
         }
 
         .gps-error h3 {
             margin: 0 0 5px 0;
             font-size: 1rem;
-            display: flex;
-            align-items: center;
-            color: var(--danger);
         }
 
         .form-group {
@@ -102,12 +98,11 @@
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
             color: var(--accent);
-            letter-spacing: 0.5px;
         }
 
         input {
@@ -119,12 +114,6 @@
             font-size: 1rem;
             color: var(--text);
             background-color: #fff;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
         }
 
         button {
@@ -138,8 +127,6 @@
             text-transform: uppercase;
             border-radius: 5px;
             cursor: pointer;
-            letter-spacing: 0.5px;
-            transition: background-color 0.2s;
         }
 
         button:disabled {
@@ -160,24 +147,11 @@
             color: var(--success);
             margin-bottom: 15px;
         }
-
-        .success-screen h2 {
-            color: var(--success);
-            font-size: 1.3rem;
-            margin: 0 0 10px 0;
-        }
-
-        .success-screen p {
-            color: var(--accent);
-            font-size: 0.95rem;
-            line-height: 1.4;
-            margin: 0;
-        }
     </style>
 </head>
 <body>
 
-<div class="card" id="appCard">
+<div class="card">
     <div class="header">
         <h1>REGISTRO DE ASISTENCIA</h1>
         <div id="placaBadge" class="placa-badge">---</div>
@@ -187,29 +161,44 @@
         🔄 Verificando parámetros del sistema y señal GPS... Por favor, espere.
     </div>
 
-    <form id="dispatchForm" class="hidden">
+    <form id="mainForm" class="hidden">
         
-        <!-- VISTA DE TÉCNICOS CORREGIDA -->
+        <datalist id="listaPersonalNombres"></datalist>
+        <datalist id="listaPersonalUsuarios"></datalist>
+
         <div id="camposTecnico" class="hidden">
             <div class="form-group">
-                <label for="tecnico1">TECNICO 1</label>
-                <input type="text" id="tecnico1" placeholder="COLOQUE SU NOMBRE COMPLETO" autocomplete="off">
+                <label>TECNICO 1</label>
+                <input type="text" id="t1Nombre" list="listaPersonalNombres" placeholder="COLOQUE SU NOMBRE COMPLETO">
             </div>
             <div class="form-group">
-                <label for="tecnico2">TECNICO 2</label>
-                <input type="text" id="tecnico2" placeholder="COLOQUE SU NOMBRE COMPLETO" autocomplete="off">
+                <label>USUARIO TECNICO 1</label>
+                <input type="text" id="t1Usuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO">
+            </div>
+            
+            <div class="form-group">
+                <label>TECNICO 2</label>
+                <input type="text" id="t2Nombre" list="listaPersonalNombres" placeholder="COLOQUE SU NOMBRE COMPLETO">
             </div>
             <div class="form-group">
-                <label for="kilometraje">Kilometraje Entrada</label>
+                <label>USUARIO TECNICO 2</label>
+                <input type="text" id="t2Usuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO">
+            </div>
+
+            <div class="form-group">
+                <label>Kilometraje Entrada</label>
                 <input type="text" id="kilometraje" placeholder="Solo números enteros. Ej. 145200" inputmode="numeric">
             </div>
         </div>
 
-        <!-- VISTA DE COORDINADOR CORREGIDA -->
         <div id="camposCoordinador" class="hidden">
             <div class="form-group">
-                <label for="coordinador">COORDINADOR</label>
-                <input type="text" id="coordinador" placeholder="COLOQUE SU NOMBRE COMPLETO" autocomplete="off">
+                <label>COORDINADOR</label>
+                <input type="text" id="coordinadorNombre" list="listaPersonalNombres" placeholder="COLOQUE SU NOMBRE COMPLETO">
+            </div>
+            <div class="form-group">
+                <label>USUARIO COORDINADOR</label>
+                <input type="text" id="coordinadorUsuario" list="listaPersonalUsuarios" placeholder="COLOQUE SU USUARIO">
             </div>
         </div>
 
@@ -224,8 +213,8 @@
 </div>
 
 <script>
-    // Reemplaza esto con tu URL de Google Apps Script real
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzlxNGfCFnx6Eb7MuRJi4VhwLZVzIrcw_iDQv7zUWeW1f5SBrq20kirRqnmxRwHZKU9Vw/exec";
+    // URL de tu implementación de Google Apps Script Ejecutable
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkd0I3NGhwznZjlsWbB1lozY6UxCRQe4apYadSljRWgFCZ7tgz9ue0ysB2SSINKijDpw/exec";
 
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('t');
@@ -233,135 +222,157 @@
     let gpsCoordinates = null;
     let rolDetectado = "";
     let identificadorDetectado = "";
+    let databasePersonal = [];
 
-    function inicializarSanitizadores() {
-        const textInputs = document.querySelectorAll('input[type="text"]');
-        textInputs.forEach(input => {
-            input.addEventListener("input", (e) => {
-                let valorLimpio = e.target.value.replace(/[<>\/\\"'`${}[\]]/g, "");
-                e.target.value = valorLimpio.toUpperCase();
-            });
-        });
-
-        const kilInput = document.getElementById("kilometraje");
-        if(kilInput) {
-            kilInput.addEventListener("input", (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, "");
-            });
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        inicializarSanitizadores();
-        
-        if (!token) {
-            bloquearFormulario("Acceso Denegado", "Por favor, escanee un código QR oficial de control de flota corporativa.");
-            return;
-        }
+    document.addEventListener("DOMContentLoaded", async () => {
+        setupSanitizers();
+        if (!token) return showGlobalError("Acceso Denegado", "Escanee un código QR oficial.");
 
         try {
             const decoded = atob(token);
             const parts = decoded.split("|");
-            if (parts.length !== 2) throw new Error();
-
             rolDetectado = parts[0].toUpperCase();
             identificadorDetectado = parts[1].toUpperCase();
 
-            const badge = document.getElementById("placaBadge");
-            if (rolDetectado === "SUPERVISOR") {
-                badge.innerText = "COORDINADOR";
-            } else {
-                badge.innerText = `PLACA: ${identificadorDetectado}`;
+            document.getElementById("placaBadge").innerText = (rolDetectado === "SUPERVISOR") ? "COORDINADOR" : `PLACA: ${identificadorDetectado}`;
+            
+            // Descargar lista del personal activo en segundo plano
+            await cargarBasePersonal();
+            
+            // Si es Técnico, validar que la placa esté OPERATIVA antes de habilitar el flujo
+            if (rolDetectado === "TECNICO") {
+                const esOperativa = await validarUnidadOperativa(identificadorDetectado);
+                if (!esOperativa) return showGlobalError("Unidad No Operativa", "Esta placa no se encuentra marcada como OPERATIVA.");
             }
 
-            verificarSeñalGPS();
-
-        } catch (e) {
-            bloquearFormulario("Error de Firma Digital", "El token proporcionado por el código QR es corrupto o inválido.");
+            iniciarValidacionGPS();
+        } catch(e) {
+            showGlobalError("Token Inválido", "El código QR escaneado no pertenece al sistema corporativo.");
         }
     });
 
-    function verificarSeñalGPS() {
-        if (!navigator.geolocation) {
-            bloquearFormulario("Hardware Incompatible", "Este dispositivo móvil no cuenta con componentes de geolocalización activos.");
-            return;
-        }
+    async function cargarBasePersonal() {
+        try {
+            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getListaPersonal`);
+            databasePersonal = await res.json();
+            
+            const dlNombres = document.getElementById("listaPersonalNombres");
+            const dlUsuarios = document.getElementById("listaPersonalUsuarios");
+            
+            databasePersonal.forEach(p => {
+                dlNombres.innerHTML += `<option value="${p.nombre}">`;
+                dlUsuarios.innerHTML += `<option value="${p.usuario}">`;
+            });
+
+            // Enlace inteligente interactivo para autocompletar Usuarios <-> Nombres
+            setupEnlaceCampos("t1Nombre", "t1Usuario");
+            setupEnlaceCampos("t2Nombre", "t2Usuario");
+            setupEnlaceCampos("coordinadorNombre", "coordinadorUsuario");
+        } catch(e) { console.log("Error al precargar personal."); }
+    }
+
+    async function validarUnidadOperativa(placa) {
+        try {
+            const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getValidarPlaca&placa=${placa}`);
+            const obj = await res.json();
+            return obj.operativa;
+        } catch(e) { return false; }
+    }
+
+    function setupEnlaceCampos(idNombre, idUsuario) {
+        const inputNombre = document.getElementById(idNombre);
+        const inputUsuario = document.getElementById(idUsuario);
+        if(!inputNombre || !inputUsuario) return;
+
+        inputNombre.addEventListener("change", (e) => {
+            const match = databasePersonal.find(p => p.nombre === e.target.value);
+            if(match) inputUsuario.value = match.usuario;
+        });
+
+        inputUsuario.addEventListener("change", (e) => {
+            const match = databasePersonal.find(p => p.usuario === e.target.value.toUpperCase());
+            if(match) inputNombre.value = match.nombre;
+        });
+    }
+
+    function iniciarValidacionGPS() {
+        if (!navigator.geolocation) return showGlobalError("Error de Hardware", "GPS no soportado.");
 
         navigator.geolocation.getCurrentPosition(
-            (position) => {
-                gpsCoordinates = `${position.coords.latitude},${position.coords.longitude}`;
+            (pos) => {
+                gpsCoordinates = `${pos.coords.latitude},${pos.coords.longitude}`;
                 document.getElementById("gpsStatus").className = "hidden";
-                
-                const form = document.getElementById("dispatchForm");
-                form.classList.remove("hidden");
+                document.getElementById("mainForm").classList.remove("hidden");
 
                 if (rolDetectado === "SUPERVISOR") {
                     document.getElementById("camposCoordinador").classList.remove("hidden");
-                    document.getElementById("coordinador").required = true;
+                    document.getElementById("coordinadorNombre").required = true;
                 } else {
                     document.getElementById("camposTecnico").classList.remove("hidden");
-                    document.getElementById("tecnico1").required = true;
+                    document.getElementById("t1Nombre").required = true;
+                    document.getElementById("t1Usuario").required = true;
                     document.getElementById("kilometraje").required = true;
                 }
-
                 document.getElementById("btnSubmit").disabled = false;
             },
-            (error) => {
-                // MENSAJE DE ERROR DE GPS EXACTO SOLICITADO
+            (err) => {
                 const banner = document.getElementById("gpsStatus");
                 banner.className = "gps-status gps-error";
                 banner.innerHTML = `
                     <h3>📡 Se requiere acceso a la ubicación</h3>
                     Para registrar su asistencia, debe activar el GPS de su dispositivo. Una vez activado, por favor recargue la página o vuelva a escanear el código QR para continuar.
                 `;
-                document.getElementById("btnSubmit").disabled = true;
             },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            { enableHighAccuracy: true, timeout: 10000 }
         );
     }
 
-    document.getElementById("dispatchForm").addEventListener("submit", async (e) => {
+    document.getElementById("mainForm").addEventListener("submit", async (e) => {
         e.preventDefault();
-        if (!gpsCoordinates) return;
-
         const btn = document.getElementById("btnSubmit");
         btn.disabled = true;
-        btn.innerText = "Sincronizando...";
+        btn.innerText = "Registrando...";
 
         const payload = {
             token: token,
             gps: gpsCoordinates,
-            tecnico1: document.getElementById("tecnico1")?.value || "",
-            tecnico2: document.getElementById("tecnico2")?.value || "",
+            t1Nombre: document.getElementById("t1Nombre")?.value || "",
+            t1Usuario: document.getElementById("t1Usuario")?.value || "",
+            t2Nombre: document.getElementById("t2Nombre")?.value || "",
+            t2Usuario: document.getElementById("t2Usuario")?.value || "",
             kilometraje: document.getElementById("kilometraje")?.value || "",
-            coordinador: document.getElementById("coordinador")?.value || ""
+            coordinadorNombre: document.getElementById("coordinadorNombre")?.value || "",
+            coordinadorUsuario: document.getElementById("coordinadorUsuario")?.value || ""
         };
 
         try {
-            await fetch(WEB_APP_URL, {
+            await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
-                mode: "no-cors", 
-                headers: { "Content-Type": "application/json" },
+                mode: "no-cors",
                 body: JSON.stringify(payload)
             });
-
-            document.getElementById("dispatchForm").classList.add("hidden");
-            document.getElementById("gpsStatus").classList.add("hidden");
+            document.getElementById("mainForm").classList.add("hidden");
             document.getElementById("successScreen").classList.remove("hidden");
-            
-        } catch (err) {
-            alert("Falla de conectividad en el canal de red. Intente nuevamente.");
+        } catch(err) {
+            alert("Error de red.");
             btn.disabled = false;
-            btn.innerText = "Registrar Asistencia";
         }
     });
 
-    function bloquearFormulario(titulo, mensaje) {
+    function setupSanitizers() {
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener("input", (e) => {
+                e.target.value = e.target.value.replace(/[<>\/\\"'`${}[\]]/g, "").toUpperCase();
+            });
+        });
+        const km = document.getElementById("kilometraje");
+        if(km) km.addEventListener("input", (e) => e.target.value = e.target.value.replace(/[^0-9]/g, ""));
+    }
+
+    function showGlobalError(tit, msg) {
         const banner = document.getElementById("gpsStatus");
         banner.className = "gps-status gps-error";
-        banner.innerHTML = `<h3>⚠️ ${titulo}</h3><p>${mensaje}</p>`;
-        document.getElementById("dispatchForm").classList.add("hidden");
-        document.getElementById("btnSubmit").disabled = true;
+        banner.innerHTML = `<h3>⚠️ ${tit}</h3><p>${msg}</p>`;
     }
 </script>
 </body>
