@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA DE ASISTENCIA corporativa</title>
+    <title>REGISTRO DE ASISTENCIA</title>
     <style>
         :root {
             --primary: #0f172a;
@@ -101,7 +101,7 @@
 
 <div class="card">
     <div class="header">
-        <h1 id="lblTitulo">ASISTENCIA</h1>
+        <h1>REGISTRO DE ASISTENCIA</h1>
         <div id="placaBadge" class="placa-badge">REVISANDO...</div>
     </div>
 
@@ -153,7 +153,7 @@
 
             <div class="chk-group">
                 <input type="checkbox" id="chkAsumeT1" onchange="toggleCoordAsumeT1(this.checked)">
-                <label for="chkAsumeT1" style="display:inline; text-transform:none;">¿Asumirá rol operativo en ruta como Técnico 1?</label>
+                <label for="chkAsumeT1" style="display:inline; text-transform:none;">AGREGAR TECNICO 2</label>
             </div>
 
             <div id="subPanelCoordT2" class="sub-sec hidden">
@@ -216,17 +216,13 @@
             rolDetectado = parts[0].toUpperCase();
             identificadorDetectado = parts[1].toUpperCase();
 
-            // Configuración Dinámica de Vistas basadas en Token Exclusivo
             if (rolDetectado === "TECNICO") {
-                document.getElementById("lblTitulo").innerText = "REGISTRO DE RUTA";
                 document.getElementById("placaBadge").innerText = `PLACA: ${identificadorDetectado}`;
                 const esOperativa = await validarPlacaUnidad(identificadorDetectado);
                 if (!esOperativa) return showGlobalError("Unidad Inoperativa", "El vehículo asignado no está marcado como OPERATIVO.");
             } else if (rolDetectado === "SUPERVISOR") {
-                document.getElementById("lblTitulo").innerText = "VISTA COORDINACIÓN";
-                document.getElementById("placaBadge").innerText = "OFICINA / DESPACHO";
+                document.getElementById("placaBadge").innerText = "COORDINADOR";
             } else if (rolDetectado === "ADMINISTRATIVO") {
-                document.getElementById("lblTitulo").innerText = "VISTA ADMINISTRATIVA";
                 document.getElementById("placaBadge").innerText = "PERSONAL GESTIÓN";
             }
 
@@ -242,7 +238,6 @@
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getListaPersonal`);
             dbPersonalCompleto = await res.json();
             
-            // Repositorios de datos únicos para evitar duplicados
             const setTecnicos = new Set();
             const setCoordinadores = new Set();
             const setAdministrativos = new Set();
@@ -251,7 +246,11 @@
 
             dbPersonalCompleto.forEach(p => {
                 const c = p.cargo.toUpperCase();
-                if (p.usuario) setUsuariosTotales.add(p.usuario.toUpperCase());
+                
+                // Filtrado estricto: Solo coordinadores y técnicos alimentan el set de usuarios
+                if (p.usuario && (c.includes("TECNICO") || c.includes("COORDINADOR"))) {
+                    setUsuariosTotales.add(p.usuario.toUpperCase());
+                }
 
                 if (c.includes("TECNICO")) {
                     setTecnicos.add(p.nombre);
@@ -263,7 +262,6 @@
                 }
             });
 
-            // Llenado de Datalists Limpios (Sin Duplicados)
             inyectarDatalist("lstNombresTecnicos", setTecnicos);
             inyectarDatalist("lstNombresCoords", setCoordinadores);
             inyectarDatalist("lstNombresAdmins", setAdministrativos);
@@ -274,14 +272,14 @@
                 selectCargo.innerHTML += `<option value="${cargo}">${cargo}</option>`;
             });
 
-            // Enlace inicial inteligente (Rompible al interactuar manualmente)
-            configurarEnlaceRompible("t1Nombre", "t1Usuario", dbPersonalCompleto);
-            configurarEnlaceRompible("t2Nombre", "t2Usuario", dbPersonalCompleto);
-            configurarEnlaceRompible("coordinadorNombre", "coordinadorUsuario", dbPersonalCompleto);
-            configurarEnlaceRompible("adminNombre", "adminUsuario", dbPersonalCompleto);
-            configurarEnlaceRompible("coordT2Nombre", "coordT2Usuario", dbPersonalCompleto);
+            // INSTALACIÓN DEL ASISTENTE INICIAL NO BLOQUEANTE
+            configurarAsistenciaInicial("t1Nombre", "t1Usuario", dbPersonalCompleto);
+            configurarAsistenciaInicial("t2Nombre", "t2Usuario", dbPersonalCompleto);
+            configurarAsistenciaInicial("coordinadorNombre", "coordinadorUsuario", dbPersonalCompleto);
+            configurarAsistenciaInicial("adminNombre", "adminUsuario", dbPersonalCompleto);
+            configurarAsistenciaInicial("coordT2Nombre", "coordT2Usuario", dbPersonalCompleto);
 
-        } catch(e) { console.error("Fallo de sincronización con base de personal."); }
+        } catch(e) { console.error("Fallo de sincronización."); }
     }
 
     function inyectarDatalist(idElemento, conjuntoDatos) {
@@ -290,33 +288,26 @@
         conjuntoDatos.forEach(valor => { elemento.innerHTML += `<option value="${valor}">`; });
     }
 
-    // ALGORITMO: Asistencia de primera entrada rompible
-    function configurarEnlaceRompible(idNombre, idUsuario, datasource) {
+    // ALGORITMO NUEVO: Sugerencia inteligente de una sola dirección (Sin sobreescritura manual)
+    function configurarAsistenciaInicial(idNombre, idUsuario, datasource) {
         const inputNombre = document.getElementById(idNombre);
         const inputUsuario = document.getElementById(idUsuario);
         if (!inputNombre || !inputUsuario) return;
 
-        let ejecutandoAutocompletado = false;
-
-        inputNombre.addEventListener("input", (e) => {
-            if (ejecutandoAutocompletado) return;
+        // Se gatilla únicamente cuando el usuario elige un elemento de la lista desplegable original
+        inputNombre.addEventListener("change", (e) => {
             const val = e.target.value.toUpperCase().trim();
             const match = datasource.find(p => p.nombre.toUpperCase() === val);
-            if (match) {
-                ejecutandoAutocompletado = true;
+            if (match && match.usuario) {
                 inputUsuario.value = match.usuario;
-                ejecutandoAutocompletado = false;
             }
         });
 
-        inputUsuario.addEventListener("input", (e) => {
-            if (ejecutandoAutocompletado) return;
+        inputUsuario.addEventListener("change", (e) => {
             const val = e.target.value.toUpperCase().trim();
             const match = datasource.find(p => p.usuario.toUpperCase() === val);
-            if (match) {
-                ejecutandoAutocompletado = true;
+            if (match && match.nombre) {
                 inputNombre.value = match.nombre;
-                ejecutandoAutocompletado = false;
             }
         });
     }
@@ -358,7 +349,7 @@
             (err) => {
                 const banner = document.getElementById("gpsStatus");
                 banner.className = "gps-status gps-error";
-                banner.innerHTML = `<h3>📡 GPS Desactivado</h3>Debe autorizar el permiso de localización para continuar con el marcaje de asistencia.`;
+                banner.innerHTML = `<h3>📡 GPS Desactivado</h3>Debe autorizar el permiso de ubicación para guardar la asistencia técnica.`;
             },
             { enableHighAccuracy: true, timeout: 12000 }
         );
@@ -368,7 +359,7 @@
         e.preventDefault();
         const btn = document.getElementById("btnSubmit");
         btn.disabled = true;
-        btn.innerText = "Registrando de forma directa...";
+        btn.innerText = "Sincronizando...";
 
         const asumeOperativo = document.getElementById("chkAsumeT1")?.checked || false;
 
