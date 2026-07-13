@@ -271,12 +271,8 @@
                 selectCargo.innerHTML += `<option value="${cargo}">${cargo}</option>`;
             });
 
-            // INSTALACIÓN DEL ASISTENTE EXCLUSIVO POR SELECCIÓN (DATALIST CLICK)
-            configurarAsistenciaPorSeleccion("t1Nombre", "t1Usuario", dbPersonalCompleto);
-            configurarAsistenciaPorSeleccion("t2Nombre", "t2Usuario", dbPersonalCompleto);
-            configurarAsistenciaPorSeleccion("coordinadorNombre", "coordinadorUsuario", dbPersonalCompleto);
-            configurarAsistenciaPorSeleccion("adminNombre", "adminUsuario", dbPersonalCompleto);
-            configurarAsistenciaPorSeleccion("coordT2Nombre", "coordT2Usuario", dbPersonalCompleto);
+            // PLAN B: SE ELIMINAN TODOS LOS ESCUCHADORES Y LOGICAS DE AUTOCOMPLETADO AUTOMATICO.
+            // LOS CAMPOS SON 100% INDEPENDIENTES DESDE LA PRIMERA LETRA.
 
         } catch(e) { console.error("Fallo de sincronización."); }
     }
@@ -285,34 +281,6 @@
         const elemento = document.getElementById(idElemento);
         elemento.innerHTML = "";
         conjuntoDatos.forEach(valor => { elemento.innerHTML += `<option value="${valor}">`; });
-    }
-
-    // ARQUITECTURA GANADORA: Captura la selección del menú desplegable y corta eventos inmediatamente
-    function configurarAsistenciaPorSeleccion(idNombre, idUsuario, datasource) {
-        const inputNombre = document.getElementById(idNombre);
-        const inputUsuario = document.getElementById(idUsuario);
-        if (!inputNombre || !inputUsuario) return;
-
-        // "input" con e.inputType nulo es el estándar que usan los navegadores cuando haces CLIC en una opción del datalist
-        inputNombre.addEventListener("input", (e) => {
-            if (!e.inputType) { 
-                const val = inputNombre.value.toUpperCase().trim();
-                const match = datasource.find(p => p.nombre.toUpperCase() === val);
-                if (match && match.usuario) {
-                    inputUsuario.value = match.usuario;
-                }
-            }
-        });
-
-        inputUsuario.addEventListener("input", (e) => {
-            if (!e.inputType) { 
-                const val = inputUsuario.value.toUpperCase().trim();
-                const match = datasource.find(p => p.usuario.toUpperCase() === val);
-                if (match && match.nombre) {
-                    inputNombre.value = match.nombre;
-                }
-            }
-        });
     }
 
     function toggleCoordAsumeT1(checkeado) {
@@ -397,7 +365,6 @@
     function setupSanitizers() {
         document.querySelectorAll('input[type="text"]').forEach(input => {
             input.addEventListener("input", (e) => {
-                // Solo limpia caracteres maliciosos e inyecta mayúsculas, pero respeta el flujo de edición del teclado
                 if(e.inputType) {
                     e.target.value = e.target.value.replace(/[<>\/\\"'`${}[\]]/g, "").toUpperCase();
                 }
