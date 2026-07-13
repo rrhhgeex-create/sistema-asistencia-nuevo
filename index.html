@@ -247,7 +247,6 @@
             dbPersonalCompleto.forEach(p => {
                 const c = p.cargo.toUpperCase();
                 
-                // Filtrado estricto: Solo coordinadores y técnicos alimentan el set de usuarios
                 if (p.usuario && (c.includes("TECNICO") || c.includes("COORDINADOR"))) {
                     setUsuariosTotales.add(p.usuario.toUpperCase());
                 }
@@ -272,12 +271,12 @@
                 selectCargo.innerHTML += `<option value="${cargo}">${cargo}</option>`;
             });
 
-            // INSTALACIÓN DEL ASISTENTE INICIAL NO BLOQUEANTE
-            configurarAsistenciaInicial("t1Nombre", "t1Usuario", dbPersonalCompleto);
-            configurarAsistenciaInicial("t2Nombre", "t2Usuario", dbPersonalCompleto);
-            configurarAsistenciaInicial("coordinadorNombre", "coordinadorUsuario", dbPersonalCompleto);
-            configurarAsistenciaInicial("adminNombre", "adminUsuario", dbPersonalCompleto);
-            configurarAsistenciaInicial("coordT2Nombre", "coordT2Usuario", dbPersonalCompleto);
+            // INSTALACIÓN DEL ASISTENTE EXCLUSIVO POR SELECCIÓN (DATALIST CLICK)
+            configurarAsistenciaPorSeleccion("t1Nombre", "t1Usuario", dbPersonalCompleto);
+            configurarAsistenciaPorSeleccion("t2Nombre", "t2Usuario", dbPersonalCompleto);
+            configurarAsistenciaPorSeleccion("coordinadorNombre", "coordinadorUsuario", dbPersonalCompleto);
+            configurarAsistenciaPorSeleccion("adminNombre", "adminUsuario", dbPersonalCompleto);
+            configurarAsistenciaPorSeleccion("coordT2Nombre", "coordT2Usuario", dbPersonalCompleto);
 
         } catch(e) { console.error("Fallo de sincronización."); }
     }
@@ -288,26 +287,30 @@
         conjuntoDatos.forEach(valor => { elemento.innerHTML += `<option value="${valor}">`; });
     }
 
-    // ALGORITMO NUEVO: Sugerencia inteligente de una sola dirección (Sin sobreescritura manual)
-    function configurarAsistenciaInicial(idNombre, idUsuario, datasource) {
+    // ARQUITECTURA GANADORA: Captura la selección del menú desplegable y corta eventos inmediatamente
+    function configurarAsistenciaPorSeleccion(idNombre, idUsuario, datasource) {
         const inputNombre = document.getElementById(idNombre);
         const inputUsuario = document.getElementById(idUsuario);
         if (!inputNombre || !inputUsuario) return;
 
-        // Se gatilla únicamente cuando el usuario elige un elemento de la lista desplegable original
-        inputNombre.addEventListener("change", (e) => {
-            const val = e.target.value.toUpperCase().trim();
-            const match = datasource.find(p => p.nombre.toUpperCase() === val);
-            if (match && match.usuario) {
-                inputUsuario.value = match.usuario;
+        // "input" con e.inputType nulo es el estándar que usan los navegadores cuando haces CLIC en una opción del datalist
+        inputNombre.addEventListener("input", (e) => {
+            if (!e.inputType) { 
+                const val = inputNombre.value.toUpperCase().trim();
+                const match = datasource.find(p => p.nombre.toUpperCase() === val);
+                if (match && match.usuario) {
+                    inputUsuario.value = match.usuario;
+                }
             }
         });
 
-        inputUsuario.addEventListener("change", (e) => {
-            const val = e.target.value.toUpperCase().trim();
-            const match = datasource.find(p => p.usuario.toUpperCase() === val);
-            if (match && match.nombre) {
-                inputNombre.value = match.nombre;
+        inputUsuario.addEventListener("input", (e) => {
+            if (!e.inputType) { 
+                const val = inputUsuario.value.toUpperCase().trim();
+                const match = datasource.find(p => p.usuario.toUpperCase() === val);
+                if (match && match.nombre) {
+                    inputNombre.value = match.nombre;
+                }
             }
         });
     }
@@ -394,7 +397,10 @@
     function setupSanitizers() {
         document.querySelectorAll('input[type="text"]').forEach(input => {
             input.addEventListener("input", (e) => {
-                e.target.value = e.target.value.replace(/[<>\/\\"'`${}[\]]/g, "").toUpperCase();
+                // Solo limpia caracteres maliciosos e inyecta mayúsculas, pero respeta el flujo de edición del teclado
+                if(e.inputType) {
+                    e.target.value = e.target.value.replace(/[<>\/\\"'`${}[\]]/g, "").toUpperCase();
+                }
             });
         });
         const km = document.getElementById("kilometraje");
