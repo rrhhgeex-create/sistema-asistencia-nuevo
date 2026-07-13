@@ -122,9 +122,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>USUARIO TÉCNICO 1</label>
+                <label>USUARIO TÉCNICO 1 (OPCIONAL)</label>
                 <div class="combo-container" id="comboT1User">
-                    <input type="text" class="combo-input" id="t1Usuario" placeholder="INGRESE USUARIO" autocomplete="off">
+                    <input type="text" class="combo-input" id="t1Usuario" placeholder="INGRESE USUARIO SI TIENE" autocomplete="off">
                     <div class="combo-arrow" onclick="toggleDropdown('dropT1User')"></div>
                     <div class="combo-dropdown" id="dropT1User"></div>
                 </div>
@@ -139,9 +139,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>USUARIO TÉCNICO 2</label>
+                <label>USUARIO TÉCNICO 2 (OPCIONAL)</label>
                 <div class="combo-container" id="comboT2User">
-                    <input type="text" class="combo-input" id="t2Usuario" placeholder="INGRESE USUARIO 2" autocomplete="off">
+                    <input type="text" class="combo-input" id="t2Usuario" placeholder="INGRESE USUARIO SI TIENE" autocomplete="off">
                     <div class="combo-arrow" onclick="toggleDropdown('dropT2User')"></div>
                     <div class="combo-dropdown" id="dropT2User"></div>
                 </div>
@@ -168,9 +168,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>USUARIO DEL COORDINADOR</label>
+                <label>USUARIO DEL COORDINADOR (OPCIONAL)</label>
                 <div class="combo-container" id="comboCoordUser">
-                    <input type="text" class="combo-input" id="coordinadorUsuario" placeholder="INGRESE USUARIO" autocomplete="off">
+                    <input type="text" class="combo-input" id="coordinadorUsuario" placeholder="INGRESE USUARIO SI TIENE" autocomplete="off">
                     <div class="combo-arrow" onclick="toggleDropdown('dropCoordUser')"></div>
                     <div class="combo-dropdown" id="dropCoordUser"></div>
                 </div>
@@ -191,9 +191,9 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>USUARIO TÉCNICO 2</label>
+                    <label>USUARIO TÉCNICO 2 (OPCIONAL)</label>
                     <div class="combo-container" id="comboCoordT2User">
-                        <input type="text" class="combo-input" id="coordT2Usuario" placeholder="INGRESE USUARIO" autocomplete="off">
+                        <input type="text" class="combo-input" id="coordT2Usuario" placeholder="INGRESE USUARIO SI TIENE" autocomplete="off">
                         <div class="combo-arrow" onclick="toggleDropdown('dropCoordT2User')"></div>
                         <div class="combo-dropdown" id="dropCoordT2User"></div>
                     </div>
@@ -203,9 +203,9 @@
 
         <div id="panelAdministrativo" class="hidden">
             <div class="welcome-admin">
-                <p>🔑 Código de Identificación Detectado:</p>
+                <p>🔑 Credencial / Identificación Detectada:</p>
                 <h3 id="lblAdminId" style="color: var(--primary); margin: 5px 0;">-</h3>
-                <p style="font-size: 0.85rem;">Su asistencia como Personal de Gestión se registrará de forma directa al presionar el botón.</p>
+                <p style="font-size: 0.85rem;">Su asistencia como Personal de Gestión se registrará de forma directa al presionar el botón inferior.</p>
             </div>
         </div>
 
@@ -347,12 +347,10 @@
                 if (rolDetectado === "TECNICO") {
                     document.getElementById("panelTecnico").classList.remove("hidden");
                     document.getElementById("t1Nombre").required = true;
-                    document.getElementById("t1Usuario").required = true;
                     document.getElementById("kilometraje").required = true;
                 } else if (rolDetectado === "SUPERVISOR") {
                     document.getElementById("panelCoordinador").classList.remove("hidden");
                     document.getElementById("coordinadorNombre").required = true;
-                    document.getElementById("coordinadorUsuario").required = true;
                 } else if (rolDetectado === "ADMINISTRATIVO") {
                     document.getElementById("panelAdministrativo").classList.remove("hidden");
                 }
