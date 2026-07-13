@@ -114,6 +114,7 @@
         <datalist id="lstNombresTecnicos"></datalist>
         <datalist id="lstNombresCoords"></datalist>
         <datalist id="lstNombresAdmins"></datalist>
+        <datalist id="lstCargosAdmins"></datalist>
         <datalist id="lstUsuariosUnicos"></datalist>
 
         <div id="panelTecnico" class="hidden">
@@ -133,6 +134,11 @@
             <div class="form-group">
                 <label>USUARIO TÉCNICO 2</label>
                 <input type="text" id="t2Usuario" list="lstUsuariosUnicos" placeholder="BUSQUE O COLOQUE MANUALMENTE" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>Placa del vehículo</label>
+                <input type="text" id="lblPlacaVehiculo" disabled style="background-color: #e2e8f0; font-weight: bold; color: #475569;">
             </div>
 
             <div class="form-group">
@@ -171,9 +177,7 @@
         <div id="panelAdministrativo" class="hidden">
             <div class="form-group">
                 <label>CARGO REGISTRADO</label>
-                <select id="adminCargo">
-                    <option value="">-- SELECCIONE UN CARGO --</option>
-                </select>
+                <input type="text" id="adminCargo" list="lstCargosAdmins" placeholder="ESCRIBA O SELECCIONE CARGO" autocomplete="off">
             </div>
             <div class="form-group">
                 <label>NOMBRE COMPLETO</label>
@@ -196,7 +200,7 @@
 </div>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkd0I3NGhwznZjlsWbB1lozY6UxCRQe4apYadSljRWgFCZ7tgz9ue0ysB2SSINKijDpw/exec"; // Coloca tu URL /exec aquí
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkd0I3NGhwznZjlsWbB1lozY6UxCRQe4apYadSljRWgFCZ7tgz9ue0ysB2SSINKijDpw/exec"; // REEMPLAZAR POR TU /exec
 
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('t');
@@ -217,13 +221,14 @@
             identificadorDetectado = parts[1].toUpperCase();
 
             if (rolDetectado === "TECNICO") {
-                document.getElementById("placaBadge").innerText = `PLACA: ${identificadorDetectado}`;
+                document.getElementById("placaBadge").innerText = "REGISTRO DE ASISTENCIA";
+                document.getElementById("lblPlacaVehiculo").value = identificadorDetectado;
                 const esOperativa = await validarPlacaUnidad(identificadorDetectado);
                 if (!esOperativa) return showGlobalError("Unidad Inoperativa", "El vehículo asignado no está marcado como OPERATIVO.");
             } else if (rolDetectado === "SUPERVISOR") {
                 document.getElementById("placaBadge").innerText = "COORDINADOR";
             } else if (rolDetectado === "ADMINISTRATIVO") {
-                document.getElementById("placaBadge").innerText = "PERSONAL GESTIÓN";
+                document.getElementById("placaBadge").innerText = "REGISTRO DE ASISTENCIA";
             }
 
             await cargarYProcesarPersonal();
@@ -247,7 +252,7 @@
             dbPersonalCompleto.forEach(p => {
                 const c = p.cargo.toUpperCase();
                 
-                if (p.usuario && (c.includes("TECNICO") || c.includes("COORDINADOR"))) {
+                if (p.usuario) {
                     setUsuariosTotales.add(p.usuario.toUpperCase());
                 }
 
@@ -265,16 +270,11 @@
             inyectarDatalist("lstNombresCoords", setCoordinadores);
             inyectarDatalist("lstNombresAdmins", setAdministrativos);
             inyectarDatalist("lstUsuariosUnicos", setUsuariosTotales);
+            inyectarDatalist("lstCargosAdmins", setCargosAdmin);
 
-            const selectCargo = document.getElementById("adminCargo");
-            setCargosAdmin.forEach(cargo => {
-                selectCargo.innerHTML += `<option value="${cargo}">${cargo}</option>`;
-            });
+            // PLAN B SE CORTO CUALQUIER LOGICA DE CRUCE AUTOMÁTICO DE DATOS PARA EVITAR ERRORES DE TECLADO
 
-            // PLAN B: SE ELIMINAN TODOS LOS ESCUCHADORES Y LOGICAS DE AUTOCOMPLETADO AUTOMATICO.
-            // LOS CAMPOS SON 100% INDEPENDIENTES DESDE LA PRIMERA LETRA.
-
-        } catch(e) { console.error("Fallo de sincronización."); }
+        } catch(e) { console.error("Fallo al descargar listas de personal pasivas."); }
     }
 
     function inyectarDatalist(idElemento, conjuntoDatos) {
@@ -306,14 +306,17 @@
                 if (rolDetectado === "TECNICO") {
                     document.getElementById("panelTecnico").classList.remove("hidden");
                     document.getElementById("t1Nombre").required = true;
+                    document.getElementById("t1Usuario").required = true;
                     document.getElementById("kilometraje").required = true;
                 } else if (rolDetectado === "SUPERVISOR") {
                     document.getElementById("panelCoordinador").classList.remove("hidden");
                     document.getElementById("coordinadorNombre").required = true;
+                    document.getElementById("coordinadorUsuario").required = true;
                 } else if (rolDetectado === "ADMINISTRATIVO") {
                     document.getElementById("panelAdministrativo").classList.remove("hidden");
                     document.getElementById("adminCargo").required = true;
                     document.getElementById("adminNombre").required = true;
+                    document.getElementById("adminUsuario").required = true;
                 }
                 document.getElementById("btnSubmit").disabled = false;
             },
