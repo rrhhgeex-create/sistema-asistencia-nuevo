@@ -88,13 +88,15 @@
         .chk-group input { width: auto; }
 
         label { display: block; margin-bottom: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--accent); }
-        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; font-size: 1rem; }
+        input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; font-size: 1rem; }
         
         button.submit-btn { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 14px; font-size: 1rem; font-weight: bold; text-transform: uppercase; border-radius: 5px; cursor: pointer; }
         button:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
         .hidden { display: none; }
         .success-screen { text-align: center; padding: 20px 10px; }
         .success-icon { font-size: 3.5rem; color: var(--success); }
+        
+        .welcome-admin { text-align: center; padding: 10px 0 20px 0; color: var(--accent); font-weight: 500; }
     </style>
 </head>
 <body>
@@ -113,8 +115,6 @@
         
         <datalist id="lstNombresTecnicos"></datalist>
         <datalist id="lstNombresCoords"></datalist>
-        <datalist id="lstNombresAdmins"></datalist>
-        <datalist id="lstCargosAdmins"></datalist>
         <datalist id="lstUsuariosUnicos"></datalist>
 
         <div id="panelTecnico" class="hidden">
@@ -137,7 +137,7 @@
             </div>
 
             <div class="form-group">
-                <label>Placa del vehículo</label>
+                <label>Vehículo Asignado (Placa)</label>
                 <input type="text" id="lblPlacaVehiculo" disabled style="background-color: #e2e8f0; font-weight: bold; color: #475569;">
             </div>
 
@@ -175,17 +175,10 @@
         </div>
 
         <div id="panelAdministrativo" class="hidden">
-            <div class="form-group">
-                <label>CARGO REGISTRADO</label>
-                <input type="text" id="adminCargo" list="lstCargosAdmins" placeholder="ESCRIBA O SELECCIONE CARGO" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label>NOMBRE COMPLETO</label>
-                <input type="text" id="adminNombre" list="lstNombresAdmins" placeholder="BUSQUE O ESCRIBA SU NOMBRE" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label>USUARIO ASIGNADO</label>
-                <input type="text" id="adminUsuario" list="lstUsuariosUnicos" placeholder="DIGITE O SELECCIONE USUARIO" autocomplete="off">
+            <div class="welcome-admin">
+                <p>🔑 Código de Identificación Detectado:</p>
+                <h3 id="lblAdminId" style="color: var(--primary); margin: 5px 0;">-</h3>
+                <p style="font-size: 0.85rem;">Su nombre, cargo y usuario serán validados directamente con la base de datos central al presionar el botón.</p>
             </div>
         </div>
 
@@ -208,7 +201,6 @@
     let gpsCoordinates = null;
     let rolDetectado = "";
     let identificadorDetectado = "";
-    let dbPersonalCompleto = [];
 
     document.addEventListener("DOMContentLoaded", async () => {
         setupSanitizers();
@@ -221,14 +213,15 @@
             identificadorDetectado = parts[1].toUpperCase();
 
             if (rolDetectado === "TECNICO") {
-                document.getElementById("placaBadge").innerText = "REGISTRO DE ASISTENCIA";
+                document.getElementById("placaBadge").innerText = "ASISTENCIA TÉCNICA";
                 document.getElementById("lblPlacaVehiculo").value = identificadorDetectado;
                 const esOperativa = await validarPlacaUnidad(identificadorDetectado);
                 if (!esOperativa) return showGlobalError("Unidad Inoperativa", "El vehículo asignado no está marcado como OPERATIVO.");
             } else if (rolDetectado === "SUPERVISOR") {
-                document.getElementById("placaBadge").innerText = "COORDINADOR";
+                document.getElementById("placaBadge").innerText = "COORDINACIÓN";
             } else if (rolDetectado === "ADMINISTRATIVO") {
-                document.getElementById("placaBadge").innerText = "REGISTRO DE ASISTENCIA";
+                document.getElementById("placaBadge").innerText = "PERSONAL GESTIÓN";
+                document.getElementById("lblAdminId").innerText = identificadorDetectado;
             }
 
             await cargarYProcesarPersonal();
@@ -239,42 +232,31 @@
     });
 
     async function cargarYProcesarPersonal() {
+        if (rolDetectado === "ADMINISTRATIVO") return; // No requiere descargar listas manuales
         try {
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getListaPersonal`);
-            dbPersonalCompleto = await res.json();
+            const dbPersonal = await res.json();
             
             const setTecnicos = new Set();
             const setCoordinadores = new Set();
-            const setAdministrativos = new Set();
             const setUsuariosTotales = new Set();
-            const setCargosAdmin = new Set();
 
-            dbPersonalCompleto.forEach(p => {
+            dbPersonal.forEach(p => {
                 const c = p.cargo.toUpperCase();
-                
-                if (p.usuario) {
-                    setUsuariosTotales.add(p.usuario.toUpperCase());
-                }
+                if (p.usuario) setUsuariosTotales.add(p.usuario.toUpperCase());
 
                 if (c.includes("TECNICO")) {
                     setTecnicos.add(p.nombre);
                 } else if (c.includes("COORDINADOR") || c.includes("COORDINADORA")) {
                     setCoordinadores.add(p.nombre);
-                } else {
-                    setAdministrativos.add(p.nombre);
-                    if (p.cargo) setCargosAdmin.add(p.cargo.toUpperCase());
                 }
             });
 
             inyectarDatalist("lstNombresTecnicos", setTecnicos);
             inyectarDatalist("lstNombresCoords", setCoordinadores);
-            inyectarDatalist("lstNombresAdmins", setAdministrativos);
             inyectarDatalist("lstUsuariosUnicos", setUsuariosTotales);
-            inyectarDatalist("lstCargosAdmins", setCargosAdmin);
 
-            // PLAN B SE CORTO CUALQUIER LOGICA DE CRUCE AUTOMÁTICO DE DATOS PARA EVITAR ERRORES DE TECLADO
-
-        } catch(e) { console.error("Fallo al descargar listas de personal pasivas."); }
+        } catch(e) { console.error("Fallo al descargar listas."); }
     }
 
     function inyectarDatalist(idElemento, conjuntoDatos) {
@@ -314,9 +296,6 @@
                     document.getElementById("coordinadorUsuario").required = true;
                 } else if (rolDetectado === "ADMINISTRATIVO") {
                     document.getElementById("panelAdministrativo").classList.remove("hidden");
-                    document.getElementById("adminCargo").required = true;
-                    document.getElementById("adminNombre").required = true;
-                    document.getElementById("adminUsuario").required = true;
                 }
                 document.getElementById("btnSubmit").disabled = false;
             },
@@ -341,17 +320,13 @@
             token: token,
             gps: gpsCoordinates,
             coordAsumeT1: asumeOperativo,
-            esAdministrativo: (rolDetectado === "ADMINISTRATIVO"),
             t1Nombre: document.getElementById("t1Nombre")?.value || "",
             t1Usuario: document.getElementById("t1Usuario")?.value || "",
             t2Nombre: asumeOperativo ? document.getElementById("coordT2Nombre")?.value : document.getElementById("t2Nombre")?.value || "",
             t2Usuario: asumeOperativo ? document.getElementById("coordT2Usuario")?.value : document.getElementById("t2Usuario")?.value || "",
             kilometraje: document.getElementById("kilometraje")?.value || "",
             coordinadorNombre: document.getElementById("coordinadorNombre")?.value || "",
-            coordinadorUsuario: document.getElementById("coordinadorUsuario")?.value || "",
-            adminCargo: document.getElementById("adminCargo")?.value || "",
-            adminNombre: document.getElementById("adminNombre")?.value || "",
-            adminUsuario: document.getElementById("adminUsuario")?.value || ""
+            coordinadorUsuario: document.getElementById("coordinadorUsuario")?.value || ""
         };
 
         try {
