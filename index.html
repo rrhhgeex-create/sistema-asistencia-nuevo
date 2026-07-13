@@ -116,7 +116,7 @@
             <div class="form-group">
                 <label>TÉCNICO 1 (CONDUCTOR)</label>
                 <div class="combo-container" id="comboT1">
-                    <input type="text" class="combo-input" id="t1Nombre" placeholder="ESCRIBA O SELECCIONE DE LA LISTA" autocomplete="off">
+                    <input type="text" class="combo-input" id="t1Nombre" placeholder="ESCRIBA O SELECCIONE" autocomplete="off">
                     <div class="combo-arrow" onclick="toggleDropdown('dropT1')"></div>
                     <div class="combo-dropdown" id="dropT1"></div>
                 </div>
@@ -133,7 +133,7 @@
             <div class="form-group">
                 <label>TÉCNICO 2</label>
                 <div class="combo-container" id="comboT2">
-                    <input type="text" class="combo-input" id="t2Nombre" placeholder="ESCRIBA O SELECCIONE DE LA LISTA" autocomplete="off">
+                    <input type="text" class="combo-input" id="t2Nombre" placeholder="ESCRIBA O SELECCIONE" autocomplete="off">
                     <div class="combo-arrow" onclick="toggleDropdown('dropT2')"></div>
                     <div class="combo-dropdown" id="dropT2"></div>
                 </div>
@@ -185,7 +185,7 @@
                 <div class="form-group">
                     <label>TÉCNICO 2 ACOMPAÑANTE</label>
                     <div class="combo-container" id="comboCoordT2">
-                        <input type="text" class="combo-input" id="coordT2Nombre" placeholder="ESCRIBA O SELECCIONE DE LA LISTA" autocomplete="off">
+                        <input type="text" class="combo-input" id="coordT2Nombre" placeholder="ESCRIBA O SELECCIONE" autocomplete="off">
                         <div class="combo-arrow" onclick="toggleDropdown('dropCoordT2')"></div>
                         <div class="combo-dropdown" id="dropCoordT2"></div>
                     </div>
@@ -205,7 +205,7 @@
             <div class="welcome-admin">
                 <p>🔑 Código de Identificación Detectado:</p>
                 <h3 id="lblAdminId" style="color: var(--primary); margin: 5px 0;">-</h3>
-                <p style="font-size: 0.85rem;">Su asistencia como Personal de Gestión se registrará de forma directa al presionar el botón inferior.</p>
+                <p style="font-size: 0.85rem;">Su asistencia como Personal de Gestión se registrará de forma directa al presionar el botón.</p>
             </div>
         </div>
 
@@ -220,7 +220,7 @@
 </div>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlxNGfCFnx6Eb7MuRJi4VhwLZVzIrcw_iDQv7zUWeW1f5SBrq20kirRqnmxRwHZKU9Vw/exec"; // REEMPLAZAR POR TU /exec
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkd0I3NGhwznZjlsWbB1lozY6UxCRQe4apYadSljRWgFCZ7tgz9ue0ysB2SSINKijDpw/exec"; // REEMPLAZAR POR TU /exec
 
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('t');
@@ -275,19 +275,16 @@
                 const nombre = p.nombre.trim();
                 if (p.usuario) setUsuarios.add(p.usuario.toUpperCase().trim());
 
-                // FILTROS ESTRICTOS EXCLUSIVOS POR CARGO
                 if (c === "TECNICO 1") arrT1.push(nombre);
                 else if (c === "TECNICO 2") arrT2.push(nombre);
                 else if (c === "COORDINADOR") arrCoord.push(nombre);
             });
 
-            // Llenar Comboboxes de Nombres
             construirComboItems("dropT1", "t1Nombre", arrT1);
             construirComboItems("dropT2", "t2Nombre", arrT2);
             construirComboItems("dropCoord", "coordinadorNombre", arrCoord);
             construirComboItems("dropCoordT2", "coordT2Nombre", arrT2);
 
-            // Llenar Comboboxes de Usuarios (Lista Global)
             const arrUsers = Array.from(setUsuarios);
             construirComboItems("dropT1User", "t1Usuario", arrUsers);
             construirComboItems("dropT2User", "t2Usuario", arrUsers);
@@ -315,7 +312,6 @@
     function toggleDropdown(idDropdown) {
         const drop = document.getElementById(idDropdown);
         const isOpen = drop.style.display === "block";
-        // Cerrar todos antes de abrir
         document.querySelectorAll('.combo-dropdown').forEach(d => d.style.display = 'none');
         drop.style.display = isOpen ? "none" : "block";
     }
