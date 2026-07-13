@@ -88,7 +88,7 @@
         .chk-group input { width: auto; }
 
         label { display: block; margin-bottom: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--accent); }
-        input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; font-size: 1rem; }
+        select, input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; font-size: 1rem; background-color: #fff; }
         
         button.submit-btn { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 14px; font-size: 1rem; font-weight: bold; text-transform: uppercase; border-radius: 5px; cursor: pointer; }
         button:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
@@ -113,27 +113,29 @@
 
     <form id="mainForm" class="hidden">
         
-        <datalist id="lstNombresTecnicos"></datalist>
-        <datalist id="lstNombresCoords"></datalist>
         <datalist id="lstUsuariosUnicos"></datalist>
 
         <div id="panelTecnico" class="hidden">
             <div class="form-group">
                 <label>TÉCNICO 1 (CONDUCTOR)</label>
-                <input type="text" id="t1Nombre" list="lstNombresTecnicos" placeholder="SELECCIONE O ESCRIBA" autocomplete="off">
+                <select id="t1Nombre">
+                    <option value="">-- SELECCIONE TÉCNICO 1 --</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>USUARIO TÉCNICO 1</label>
-                <input type="text" id="t1Usuario" list="lstUsuariosUnicos" placeholder="BUSQUE O COLOQUE MANUALMENTE" autocomplete="off">
+                <input type="text" id="t1Usuario" list="lstUsuariosUnicos" placeholder="INGRESE SU USUARIO" autocomplete="off">
             </div>
             
             <div class="form-group">
                 <label>TÉCNICO 2</label>
-                <input type="text" id="t2Nombre" list="lstNombresTecnicos" placeholder="SELECCIONE O ESCRIBA" autocomplete="off">
+                <select id="t2Nombre">
+                    <option value="">-- SELECCIONE TÉCNICO 2 --</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>USUARIO TÉCNICO 2</label>
-                <input type="text" id="t2Usuario" list="lstUsuariosUnicos" placeholder="BUSQUE O COLOQUE MANUALMENTE" autocomplete="off">
+                <input type="text" id="t2Usuario" list="lstUsuariosUnicos" placeholder="INGRESE USUARIO 2" autocomplete="off">
             </div>
 
             <div class="form-group">
@@ -150,11 +152,13 @@
         <div id="panelCoordinador" class="hidden">
             <div class="form-group">
                 <label>NOMBRE DEL COORDINADOR</label>
-                <input type="text" id="coordinadorNombre" list="lstNombresCoords" placeholder="SELECCIONE NOMBRE" autocomplete="off">
+                <select id="coordinadorNombre">
+                    <option value="">-- SELECCIONE COORDINADOR --</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>USUARIO DEL COORDINADOR</label>
-                <input type="text" id="coordinadorUsuario" list="lstUsuariosUnicos" placeholder="SELECCIONE USUARIO" autocomplete="off">
+                <input type="text" id="coordinadorUsuario" list="lstUsuariosUnicos" placeholder="INGRESE USUARIO" autocomplete="off">
             </div>
 
             <div class="chk-group">
@@ -165,11 +169,13 @@
             <div id="subPanelCoordT2" class="sub-sec hidden">
                 <div class="form-group">
                     <label>TÉCNICO 2 ACOMPAÑANTE</label>
-                    <input type="text" id="coordT2Nombre" list="lstNombresTecnicos" placeholder="SELECCIONE O ESCRIBA" autocomplete="off">
+                    <select id="coordT2Nombre">
+                        <option value="">-- SELECCIONE TÉCNICO 2 --</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>USUARIO TÉCNICO 2</label>
-                    <input type="text" id="coordT2Usuario" list="lstUsuariosUnicos" placeholder="BUSQUE O INGRESE USUARIO" autocomplete="off">
+                    <input type="text" id="coordT2Usuario" list="lstUsuariosUnicos" placeholder="INGRESE USUARIO" autocomplete="off">
                 </div>
             </div>
         </div>
@@ -178,7 +184,7 @@
             <div class="welcome-admin">
                 <p>🔑 Código de Identificación Detectado:</p>
                 <h3 id="lblAdminId" style="color: var(--primary); margin: 5px 0;">-</h3>
-                <p style="font-size: 0.85rem;">Su nombre, cargo y usuario serán validados directamente con la base de datos central al presionar el botón.</p>
+                <p style="font-size: 0.85rem;">Su asistencia como Personal de Gestión se guardará de forma directa al presionar el botón.</p>
             </div>
         </div>
 
@@ -232,37 +238,42 @@
     });
 
     async function cargarYProcesarPersonal() {
-        if (rolDetectado === "ADMINISTRATIVO") return; // No requiere descargar listas manuales
+        if (rolDetectado === "ADMINISTRATIVO") return;
         try {
             const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=getListaPersonal`);
             const dbPersonal = await res.json();
             
-            const setTecnicos = new Set();
-            const setCoordinadores = new Set();
+            const selectT1 = document.getElementById("t1Nombre");
+            const selectT2 = document.getElementById("t2Nombre");
+            const selectCoordT2 = document.getElementById("coordT2Nombre");
+            const selectCoord = document.getElementById("coordinadorNombre");
             const setUsuariosTotales = new Set();
 
             dbPersonal.forEach(p => {
-                const c = p.cargo.toUpperCase();
-                if (p.usuario) setUsuariosTotales.add(p.usuario.toUpperCase());
+                const c = p.cargo.toUpperCase().trim();
+                const nombre = p.nombre.trim();
+                
+                if (p.usuario) setUsuariosTotales.add(p.usuario.toUpperCase().trim());
 
-                if (c.includes("TECNICO")) {
-                    setTecnicos.add(p.nombre);
-                } else if (c.includes("COORDINADOR") || c.includes("COORDINADORA")) {
-                    setCoordinadores.add(p.nombre);
+                // FILTROS ESTRICTOS POR CARGO PARA EVITAR MEZCLAS
+                if (c === "TECNICO 1") {
+                    selectT1.innerHTML += `<option value="${nombre}">${nombre}</option>`;
+                } 
+                else if (c === "TECNICO 2") {
+                    selectT2.innerHTML += `<option value="${nombre}">${nombre}</option>`;
+                    selectCoordT2.innerHTML += `<option value="${nombre}">${nombre}</option>`;
+                } 
+                else if (c.includes("COORDINADOR") || c.includes("COORDINADORA")) {
+                    selectCoord.innerHTML += `<option value="${nombre}">${nombre}</option>`;
                 }
             });
 
-            inyectarDatalist("lstNombresTecnicos", setTecnicos);
-            inyectarDatalist("lstNombresCoords", setCoordinadores);
-            inyectarDatalist("lstUsuariosUnicos", setUsuariosTotales);
+            // Llenar datalist pasivo de usuarios
+            const dlUsuarios = document.getElementById("lstUsuariosUnicos");
+            dlUsuarios.innerHTML = "";
+            setUsuariosTotales.forEach(u => { dlUsuarios.innerHTML += `<option value="${u}">`; });
 
         } catch(e) { console.error("Fallo al descargar listas."); }
-    }
-
-    function inyectarDatalist(idElemento, conjuntoDatos) {
-        const elemento = document.getElementById(idElemento);
-        elemento.innerHTML = "";
-        conjuntoDatos.forEach(valor => { elemento.innerHTML += `<option value="${valor}">`; });
     }
 
     function toggleCoordAsumeT1(checkeado) {
