@@ -84,7 +84,7 @@
         /* COMBOBOX CUSTOM STYLE PRO */
         .combo-container { position: relative; width: 100%; }
         .combo-input { width: 100%; padding: 12px 40px 12px 12px; border: 1px solid var(--border); border-radius: 5px; box-sizing: border-box; font-size: 1rem; background-color: #fff; }
-        .combo-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid var(--accent); cursor: pointer; pointer-events: auto; }
+        .combo-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 0; height: 0; /* Aumentamos de 6px a 10px para que sea más grande */ border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--accent); cursor: pointer; pointer-events: auto; }
         .combo-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 0 0 5px 5px; max-height: 200px; overflow-y: auto; z-index: 999; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; margin-top: 2px; }
         .combo-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
         .combo-item:hover { background-color: #f1f5f9; }
@@ -414,6 +414,24 @@
         banner.className = "gps-status gps-error";
         banner.innerHTML = `<h3>⚠️ ${tit}</h3><p>${msg}</p>`;
     }
+    #kilometraje {
+    width: 100%;
+    padding: 16px 12px; /* Más alto y cómodo para el tacto */
+    font-size: 1.25rem;  /* Texto notablemente más grande */
+    font-weight: bold;   /* Números en negrita para mejor lectura */
+    border: 2px solid var(--border); /* Borde un poco más definido */
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    color: var(--primary);
+}
+
+/* Cambia el color del texto de sugerencia (placeholder) para que se lea claro */
+#kilometraje::placeholder {
+    font-size: 1rem;
+    font-weight: normal;
+    color: #94a3b8;
+}
 </script>
 </body>
 </html>
