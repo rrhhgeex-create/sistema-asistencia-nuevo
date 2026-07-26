@@ -114,7 +114,7 @@
         
         <div id="panelTecnico" class="hidden">
             <div class="form-group">
-                <label>TÉCNICO 1 (CONDUCTOR)</label>
+                <label>TÉCNICO 1</label>
                 <div class="combo-container" id="comboT1">
                     <input type="text" class="combo-input" id="t1Nombre" placeholder="ESCRIBA O SELECCIONE" autocomplete="off">
                     <div class="combo-arrow" onclick="toggleDropdown('dropT1')"></div>
@@ -183,7 +183,7 @@
 
             <div id="subPanelCoordT2" class="sub-sec hidden">
                 <div class="form-group">
-                    <label>TÉCNICO 2 ACOMPAÑANTE</label>
+                    <label>TÉCNICO 2</label>
                     <div class="combo-container" id="comboCoordT2">
                         <input type="text" class="combo-input" id="coordT2Nombre" placeholder="ESCRIBA O SELECCIONE" autocomplete="off">
                         <div class="combo-arrow" onclick="toggleDropdown('dropCoordT2')"></div>
@@ -241,12 +241,12 @@
             identificadorDetectado = parts[1].toUpperCase();
 
             if (rolDetectado === "TECNICO") {
-                document.getElementById("placaBadge").innerText = "ASISTENCIA TÉCNICA";
+                document.getElementById("placaBadge").innerText = "TÉCNICOS";
                 document.getElementById("lblPlacaVehiculo").value = identificadorDetectado;
                 const esOperativa = await validarPlacaUnidad(identificadorDetectado);
                 if (!esOperativa) return showGlobalError("Unidad Inoperativa", "El vehículo asignado no está marcado como OPERATIVO.");
             } else if (rolDetectado === "SUPERVISOR") {
-                document.getElementById("placaBadge").innerText = "COORDINACIÓN";
+                document.getElementById("placaBadge").innerText = "COORDINADOR";
             } else if (rolDetectado === "ADMINISTRATIVO") {
                 document.getElementById("placaBadge").innerText = "PERSONAL GESTIÓN";
                 document.getElementById("lblAdminId").innerText = identificadorDetectado;
