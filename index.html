@@ -182,14 +182,6 @@
                         <div class="combo-dropdown" id="dropCoordT2"></div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>USUARIO TÉCNICO 2 (OPCIONAL)</label>
-                    <div class="combo-container" id="comboCoordT2User">
-                        <input type="text" class="combo-input" id="coordT2Usuario" placeholder="INGRESE USUARIO SI TIENE" autocomplete="off">
-                        <div class="combo-arrow" onclick="toggleDropdown('dropCoordT2User')"></div>
-                        <div class="combo-dropdown" id="dropCoordT2User"></div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -279,9 +271,7 @@
 
             const arrUsers = Array.from(setUsuarios);
             construirComboItems("dropT1User", "t1Usuario", arrUsers);
-            construirComboItems("dropT2User", "t2Usuario", arrUsers);
             construirComboItems("dropCoordUser", "coordinadorUsuario", arrUsers);
-            construirComboItems("dropCoordT2User", "coordT2Usuario", arrUsers);
 
         } catch(e) { console.error("Error cargando la lista de personal."); }
     }
@@ -372,7 +362,7 @@
             t1Nombre: document.getElementById("t1Nombre")?.value || "",
             t1Usuario: document.getElementById("t1Usuario")?.value || "",
             t2Nombre: asumeOperativo ? document.getElementById("coordT2Nombre")?.value : document.getElementById("t2Nombre")?.value || "",
-            t2Usuario: asumeOperativo ? document.getElementById("coordT2Usuario")?.value : document.getElementById("t2Usuario")?.value || "",
+            t2Usuario: "",
             kilometraje: document.getElementById("kilometraje")?.value || "",
             coordinadorNombre: document.getElementById("coordinadorNombre")?.value || "",
             coordinadorUsuario: document.getElementById("coordinadorUsuario")?.value || ""
